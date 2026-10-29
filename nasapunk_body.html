@@ -3,9 +3,9 @@
 <footer id="nasapunk-footer" aria-label="站点信息">
   <div class="nasapunk-footer-brand-row">
     <div class="nasapunk-footer-brand">
-      <svg xmlns="http://www.w3.org/2000/svg" width="764" height="108" viewBox="-4 -4 764 108" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="nasapunk-footer-wordmark-title" class="nasapunk-footer-logo">
+      <svg xmlns="http://www.w3.org/2000/svg" width="660" height="108" viewBox="-4 -4 660 108" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="nasapunk-footer-wordmark-title" class="nasapunk-footer-logo">
         <title id="nasapunk-footer-wordmark-title">NASAPUNK</title>
-        <g fill="currentColor" fill-rule="evenodd">
+        <g fill="currentColor" fill-rule="evenodd" transform="scale(0.8624338624 1)">
           <path transform="translate(0 0)" d="M0 100V0H24L60 57V0H84V100H60L24 43V100Z"/>
           <path transform="translate(96 0)" d="M0 100V20L20 0H64L84 20V100H58V64H26V100ZM26 24V42H58V24Z"/>
           <path transform="translate(192 0)" d="M18 0H84V24H26V38H66L84 56V82L66 100H0V76H58V62H18L0 44V18Z"/>
@@ -42,7 +42,8 @@
   if (!ready) return;
   const script = document.createElement("script");
   script.src = window.NASAPUNK_CONFIG.assetBase.replace(/\/$/, "") + "/nasapunk-main.js";
-  script.onerror = () => { window.__nasapunkBoot?.finish(); console.error("NASAPUNK: 页面脚本加载失败"); };
+  script.onload = () => window.__nasapunkPageLoaded?.();
+  script.onerror = () => { window.__nasapunkAssetFailure?.(); console.error("NASAPUNK: 页面脚本加载失败"); };
   document.body.append(script);
 });
 </script>

@@ -4,14 +4,14 @@
 
 | 文件 | 职责 |
 | --- | --- |
-| `nasapunk_head.html` | 配置、字体和颜色变量、资源加载器 |
+| `nasapunk_head.html` | 配置、字体和颜色变量、内联首屏样式与控制器、资源加载器 |
 | `nasapunk_body.html` | 可编辑页脚 HTML、页面脚本入口 |
 | `src/nasapunk.css` | 固定布局、外观和动画 |
-| `src/nasapunk-head.js` | 首屏进度动画、公告与提示适配 |
+| `src/nasapunk-head.js` | 公告与提示适配 |
 | `src/nasapunk-main.js` | DOM、主题、账户、Markdown、底栏和色带适配 |
 | `src/nasapunk-icon.svg` | 默认图形 Logo 与 favicon |
 
-无需打包。头部先加载 CSS，再加载 head 脚本；body 入口等待 `window.__nasapunkAssetsReady` 成功后加载 main。加载失败会跳过后续步骤或撤下首屏遮罩，错误可从控制台查看。文件统一使用 UTF-8、CRLF。
+无需打包。首屏必需样式与控制器直接内联在 HTML head 中，在任何 CDN 请求完成前挂载遮罩。外部 CSS、通知脚本、页面脚本加载成功且页面资源就绪后才揭幕。body 入口等待 `window.__nasapunkAssetsReady` 后加载 main，成功时通知首屏控制器；资源错误或超时会解除遮罩。首屏开关关闭时仍暂时隐藏未就绪的正文，避免无样式内容闪现。文件统一使用 UTF-8、CRLF。
 
 ## JavaScript 配置
 
@@ -115,7 +115,7 @@ window.NASAPUNK_CONFIG = {
 
 为所用字重、斜体提供对应文件或可变字体范围。中文优先使用合法分片字体；不要把系统商业字体直接上传。跨域字体服务须支持 CORS。
 
-加载画面 NASAPUNK/CLOUD 和页脚字标是固定 SVG 路径，字体变量不会改变它们。其余标题使用 HTML/CSS；文章标题使用无附加描边的实心字形和正常字距，无需建立通用 SVG 字库。
+加载画面 NASA/PUNK 和页脚字标是固定 SVG 路径，字体变量不会改变它们。其余标题使用 HTML/CSS；文章标题使用无附加描边的实心字形和正常字距，无需建立通用 SVG 字库。
 
 颜色位于 head 的 `nasapunk-color-config`，变量前缀为 `--nasapunk-`：
 
@@ -243,3 +243,7 @@ logoUrl: ""
 ```
 
 以上是三种互斥写法，只选择一项放入配置对象。自定义路径应返回图像文件，不是 GitHub 的文件预览页面。SVG 按 `image/svg+xml` 提供。发布时同时上传该 SVG；相同 URL 替换图标可能受浏览器和 CDN 缓存影响，建议使用新提交 SHA 或标签。图形设计提示词见 [LOGO_PROMPT.md](LOGO_PROMPT.md)。
+
+## 视觉兼容
+
+脱敏、资源拆分和实现优化应保持既有布局、字体大小、图层顺序和动画效果；文字内容替换时同步核对 SVG 显示框和定位类名。首屏样式与启动代码保持内联，不依赖 CDN 才开始执行。调整资源加载器时应检查慢速响应、缓存命中、请求失败和超时场景，确保页面不会先于遮罩出现，也不会被永久锁住。

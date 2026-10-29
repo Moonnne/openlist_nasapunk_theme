@@ -36,7 +36,7 @@
 2. 打开 [nasapunk_body.html](nasapunk_body.html)，同样复制完整内容，粘贴到「自定义内容」。
 3. 保存并刷新前台页面。如果已有其他主题，请替换旧代码，不要叠加。
 
-head 已配置本仓库的 jsDelivr 地址，会自动加载 `src/` 中的资源：
+首屏加载遮罩的样式和启动逻辑内联在 head 中，其余资源通过 CDN 加载。head 已配置本仓库的 jsDelivr 地址：
 
 ```text
 https://cdn.jsdelivr.net/gh/Moonnne/openlist_nasapunk_theme@main/src

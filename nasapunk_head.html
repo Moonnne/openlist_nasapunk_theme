@@ -92,16 +92,537 @@ html[data-nasapunk-mode="dark"] {
 
 </style>
 <script>
-// 共用一个 CDN 基址；加载失败时保留原生页面，避免遮罩锁住页面。
+// 首屏样式与控制器内联；CDN 资源就绪后才允许页面揭幕。
+window.__nasapunkResourcesReady = false;
+if (!/\/@(?:manage|init)(?:\/|$)/.test(location.pathname)) document.documentElement.setAttribute("data-nasapunk-assets-pending", "");
+</script>
+<style id="nasapunk-critical-style">
+/* 启动画面：三条带自底部升起 → 平滑双向实心进度条 */
+#nasapunk-boot {
+  --nasapunk-font-active: var(--nasapunk-font-label);
+  --nasapunk-art-graphite: #303733;
+  /* 这里填写不透明度：对应近 / 中 / 远层的透明度 30% / 55% / 80%。 */
+  --nasapunk-echo-near: .40;
+  --nasapunk-echo-middle: .25;
+  --nasapunk-echo-far: .10;
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  display: grid;
+  place-items: center;
+  background: var(--nasapunk-paper, #ece5d6);
+  color: var(--nasapunk-ink, #2b302e);
+  overflow: hidden;
+  isolation: isolate;
+  /* 正常退场由资源检查点触发，没有按固定时间隐藏的 CSS。 */
+  transition: opacity .48s ease, visibility .48s;
+}
+#nasapunk-boot *, #nasapunk-boot *::before, #nasapunk-boot *::after { box-sizing: border-box; }
+#nasapunk-boot::before {
+  content: "";
+  position: absolute;
+  inset: clamp(16px, 3vw, 44px);
+  border: 1px solid var(--nasapunk-line);
+  pointer-events: none;
+  /* #nasapunk-boot 自成层叠上下文：底色之上、所有文字和控件之下。 */
+  z-index: -1;
+}
+#nasapunk-boot::after {
+  content: "";
+  position: absolute;
+  top: 48px;
+  right: 50px;
+  width: 32px;
+  height: 1px;
+  background: var(--nasapunk-edge);
+  box-shadow: -9px 4px 0 var(--nasapunk-edge), 3px 7px 0 var(--nasapunk-line);
+  opacity: .18;
+  transform: rotate(-9deg);
+  pointer-events: none;
+  z-index: -1;
+}
+/* 细线框之上的装饰字形是内联 SVG 路径，不依赖访客字体或外部文件。
+   主字使用完全不透明的石墨色，残影为高透明度三色实心填充，无描边。
+   SVG viewBox 只包围主字；残影绘制在框外，不参与主字定位。
+   纵向范围：NASA 为 12.7–37.7vh，PUNK 为 62.8–87.6vh。
+   宽度随高度按原始字形比例同步缩放，不单独拉伸或压缩任何方向。
+   两组主字分别从左、右屏幕边缘超出 4vw，保留装饰文字的裁切构图。 */
+.nasapunk-boot-art {
+  position: absolute;
+  z-index: 0;
+  width: auto;
+  aspect-ratio: var(--nasapunk-art-ratio);
+  visibility: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+.nasapunk-boot-art--nasa { left: -4vw; top: 12.7vh; height: 25vh; }
+.nasapunk-boot-art--punk { right: -4vw; top: 62.8vh; height: 24.8vh; }
+.nasapunk-boot-art svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.nasapunk-art-echo {
+  fill: var(--nasapunk-echo-color);
+  stroke: none;
+  opacity: var(--nasapunk-echo-opacity);
+  visibility: hidden;
+}
+/* 仪表实际入场完成后，标题复用相同的淡入上移动画；随后残影逐层展开。 */
+#nasapunk-boot[data-art-ready] .nasapunk-boot-art { visibility: visible; animation: nasapunk-instrument .32s both; }
+#nasapunk-boot[data-art-ready] .nasapunk-art-echo { animation: nasapunk-echo-spread .2s var(--nasapunk-echo-delay) cubic-bezier(.2,.8,.2,1) both; }
+.nasapunk-art-front-base { fill: var(--nasapunk-paper); }
+.nasapunk-art-front-ink { fill: var(--nasapunk-art-graphite); }
+@keyframes nasapunk-echo-spread {
+  0% { visibility: hidden; transform: translateX(0); }
+  1% { visibility: visible; }
+  100% { visibility: visible; transform: translateX(var(--nasapunk-echo-offset)); }
+}
+.nasapunk-boot-stripes {
+  position: absolute;
+  z-index: 1;
+  inset: 0 auto 0 50%;
+  display: flex;
+  width: clamp(78px, 13vw, 162px);
+  transform: translateX(-50%);
+}
+.nasapunk-boot-stripes i { flex: 1; height: 100%; transform: translateY(100%); animation: nasapunk-rise .95s cubic-bezier(.22,.75,.2,1) both; }
+.nasapunk-boot-stripes i:nth-child(1) { background: var(--nasapunk-mint); }
+.nasapunk-boot-stripes i:nth-child(2) { background: var(--nasapunk-ochre); animation-delay: .06s; }
+.nasapunk-boot-stripes i:nth-child(3) { background: var(--nasapunk-red); animation-delay: .12s; }
+.nasapunk-boot-instrument {
+  position: relative;
+  z-index: 3;
+  width: min(680px, calc(100vw - 48px));
+  padding: 32px clamp(16px, 3vw, 32px) 30px;
+  background: var(--nasapunk-paper);
+  border: 1px solid var(--nasapunk-edge);
+  box-shadow: 4px 4px 0 rgba(28, 33, 27, .16);
+  animation: nasapunk-instrument .32s 1.08s both;
+}
+.nasapunk-boot-legend {
+  position: absolute;
+  left: 18px;
+  top: -10px;
+  padding: 0 8px;
+  background: var(--nasapunk-paper);
+  font-size: 11px;
+  line-height: 18px;
+  font-weight: 900;
+  letter-spacing: .22em;
+}
+.nasapunk-boot-track { position: relative; height: 24px; background: var(--nasapunk-recess); }
+/* 进度条边框独立绘制，填充和反色文字共用坐标。 */
+.nasapunk-boot-track::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--nasapunk-edge);
+  pointer-events: none;
+}
+.nasapunk-boot-fill { position: absolute; inset: 3px; display: flex; }
+.nasapunk-boot-half { width: 50%; height: 100%; background: var(--nasapunk-ink); transform: scaleX(var(--nasapunk-progress, 0)); transform-origin: left; }
+.nasapunk-boot-half:last-child { transform-origin: right; }
+.nasapunk-boot-percent {
+  /* 三层相同文字：原色一层、左右实心填充对应的反色各一层。 */
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  color: var(--nasapunk-ink);
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .08em;
+  text-align: center;
+  pointer-events: none;
+}
+.nasapunk-boot-percent--left, .nasapunk-boot-percent--right { color: var(--nasapunk-paper); }
+.nasapunk-boot-percent--left { clip-path: inset(3px calc(100% - var(--nasapunk-fill-edge, 3px)) 3px 3px); }
+.nasapunk-boot-percent--right { clip-path: inset(3px 3px 3px calc(100% - var(--nasapunk-fill-edge, 3px))); }
+#nasapunk-boot[data-state="leaving"] { opacity: 0; visibility: hidden; pointer-events: none; }
+#nasapunk-boot[data-state="leaving"] .nasapunk-boot-stripes { transform: translate(-50%, -5vh); transition: transform .48s ease; }
+@keyframes nasapunk-rise { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes nasapunk-instrument { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+
+.nasapunk-cross-grid {
+  position: absolute; inset: clamp(16px, 3vw, 44px); display: grid;
+  grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(3, 1fr);
+  place-items: center; color: var(--nasapunk-line); pointer-events: none;
+}
+.nasapunk-cross-grid i { position: relative; display: block; width: clamp(16px, 1.6vw, 26px); aspect-ratio: 1; }
+.nasapunk-cross-grid i::before, .nasapunk-cross-grid i::after { content: ""; position: absolute; background: currentColor; }
+.nasapunk-cross-grid i::before { width: 100%; height: 1px; left: 0; top: calc(50% - .5px); }
+.nasapunk-cross-grid i::after { height: 100%; width: 1px; top: 0; left: calc(50% - .5px); }
+#nasapunk-boot > .nasapunk-cross-grid { z-index: -1; }
+
+#nasapunk-boot { font-family: var(--nasapunk-font-label); }
+html[data-nasapunk-assets-pending] body > :not(#nasapunk-boot) { visibility: hidden !important; }
+@media (prefers-reduced-motion: reduce) {
+  #nasapunk-boot[data-art-ready] .nasapunk-boot-art { animation: none; transform: none; }
+  #nasapunk-boot[data-art-ready] .nasapunk-art-echo { visibility: visible; animation: none; transform: translateX(var(--nasapunk-echo-offset)); }
+  .nasapunk-boot-stripes i, .nasapunk-boot-instrument { animation: none; transform: none; opacity: 1; }
+  #nasapunk-boot, #nasapunk-boot[data-state="leaving"] .nasapunk-boot-stripes { transition: none; }
+}
+</style>
+<script id="nasapunk-boot-controller">
+/* 首屏加载控制
+   百分比是首屏准备检查点，不是下载字节比例；不劫持 fetch/XHR。
+   12% 文档解析 → 28% 应用挂载 → 45% 页面外壳 → 72% 内容就绪
+   → 80% 样式 → 86% 字体 → 97% 首屏图片 → 100% 稳定、可以进入。
+   不等待屏幕外懒加载图、视频完整下载或跨域 iframe 内部资源。
+   资源就绪 + 最低展示时长满足后才到 100%，完成后再退场。
+*/
+(() => {
+  "use strict";
+  if (window.__nasapunkBoot) return;
+  const html = document.documentElement;
+  if (/\/@(?:manage|init)(?:\/|$)/.test(location.pathname)) return;
+  html.setAttribute("data-nasapunk-theme", "01");
+  let initialMode;
+  try { initialMode = sessionStorage.getItem("nasapunk-color-mode-session"); } catch {}
+  html.dataset.nasapunkMode = /^(light|dark)$/.test(initialMode) ? initialMode : (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  const CONFIG = { ...{
+    enabled: true,
+    minimumMs: 1800,     // 最低展示时长；慢速加载按实际就绪时间等待
+    stableMs: 180,       // 避免懒加载组件切换间隙误判
+    completeHoldMs: 180, // 100% 确实画出来以后，再开始退场
+    stalledMs: 40000     // 仅异常兜底：40 秒无检查点进展，揭开原页面
+  }, ...(window.NASAPUNK_CONFIG?.loading || {}) };
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let panel, observer, watchTimer, mountedAt, readySince = 0;
+  let frame = 0, inspectFrame = 0, completeTimer, leaveTimer;
+  let target = 0, shown = 0, tweenTarget = -1, tweenFrom = 0, tweenStart = 0;
+  let lastAdvance = performance.now(), lastInteger = -1;
+  let readyView, readySignature = "", completing = false, finished = false;
+  let track, percent;
+  let artComplete = reduced, progressPainted = false;
+  const completedArtGroups = new Set();
+  const settledSheets = new WeakMap();
+  const lockedNodes = new Map();
+  // 首屏生命周期接口，供页面适配器在后台路由或加载失败时清理遮罩。
+  window.__nasapunkBoot = { finish: cancel, get done() { return finished; } };
+
+  function stopWatching() {
+    observer?.disconnect();
+    clearInterval(watchTimer);
+    cancelAnimationFrame(inspectFrame);
+    document.removeEventListener("load", onResource, true);
+    document.removeEventListener("error", onResource, true);
+    document.removeEventListener("DOMContentLoaded", queueInspect);
+    document.fonts?.removeEventListener("loadingdone", queueInspect);
+    document.fonts?.removeEventListener("loadingerror", queueInspect);
+  }
+  function unlock() {
+    for (const [node, wasInert] of lockedNodes) node.inert = wasInert;
+    lockedNodes.clear();
+  }
+  function cancel() {
+    if (finished) return;
+    finished = true;
+    html.removeAttribute("data-nasapunk-assets-pending");
+    stopWatching();
+    cancelAnimationFrame(frame);
+    clearTimeout(completeTimer);
+    clearTimeout(leaveTimer);
+    window.removeEventListener("pagehide", cancel);
+    window.removeEventListener("resize", syncArtSpacing);
+    panel?.removeEventListener("animationend", onBootAnimation);
+    panel?.removeEventListener("animationcancel", onBootAnimation);
+    unlock();
+    panel?.remove();
+    window.dispatchEvent(new Event("nasapunk:boot-complete"));
+  }
+  function leave() {
+    if (finished) return;
+    progressPainted = true;
+    // 缓存命中也让标题与最后一层残影完整展示，避免退场切断入场动画。
+    if (!artComplete || panel.dataset.state === "complete" || panel.dataset.state === "leaving") return;
+    panel.dataset.state = "complete";
+    // 两帧后开始计时，确保浏览器先绘制 100%，再开始完成停留时间。
+    frame = requestAnimationFrame(() => {
+      frame = requestAnimationFrame(() => {
+        completeTimer = setTimeout(() => {
+          if (finished) return;
+          unlock();
+          panel.dataset.state = "leaving";
+          leaveTimer = setTimeout(cancel, reduced ? 0 : 500);
+        }, reduced ? 0 : CONFIG.completeHoldMs);
+      });
+    });
+  }
+  function startArt() {
+    if (finished || panel.hasAttribute("data-art-ready")) return;
+    panel.setAttribute("data-art-ready", "");
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      artComplete = true;
+      if (progressPainted) leave();
+    }
+  }
+  function onBootAnimation(event) {
+    if (event.target.matches(".nasapunk-boot-instrument") && event.animationName === "nasapunk-instrument") {
+      startArt();
+    } else if (event.animationName === "nasapunk-echo-spread" && Math.abs(Number(event.target.dataset.nasapunkEchoDepth)) === 3) {
+      completedArtGroups.add(event.target);
+      if (completedArtGroups.size === 2) {
+        artComplete = true;
+        if (progressPainted) leave();
+      }
+    }
+  }
+  function visible(element) {
+    if (!element || !element.getClientRects().length) return false;
+    // 以原生 spinner 的存在判断加载状态；页面适配器会将其设为透明。
+    return getComputedStyle(element).visibility !== "hidden";
+  }
+  function onResource(event) {
+    const element = event.target;
+    if (element instanceof HTMLLinkElement) settledSheets.set(element, element.href);
+    queueInspect();
+  }
+  function advance(value) {
+    if (value <= target) return;
+    target = value;
+    lastAdvance = performance.now();
+    if (!frame) frame = requestAnimationFrame(draw);
+  }
+  function draw(now) {
+    frame = 0;
+    if (finished) return;
+    // 仪表入场前保持 0，避免快缓存时只看见突然跳到接近完成的数字。
+    if (!reduced && now - mountedAt < 1080) {
+      frame = requestAnimationFrame(draw);
+      return;
+    }
+    if (tweenTarget !== target) {
+      tweenTarget = target;
+      tweenFrom = shown;
+      tweenStart = now;
+    }
+    const duration = reduced ? 0 : completing ? 300 : 440;
+    const t = duration ? Math.min(1, (now - tweenStart) / duration) : 1;
+    shown = tweenFrom + (tweenTarget - tweenFrom) * (1 - Math.pow(1 - t, 3));
+    // 填充与数字共享插值；真正抵达终点才显示 100，非整数检查点也只显示整数。
+    track.style.setProperty("--nasapunk-progress", String(shown / 100));
+    // 填充区域 inset=3px；这里使用同一几何边界裁剪反色文字，无须逐帧读取布局。
+    const ratio = shown / 100;
+    track.style.setProperty("--nasapunk-fill-edge", "calc(" + (ratio * 50) + "% + " + (3 * (1 - ratio)) + "px)");
+    const integer = completing && t === 1 ? 100 : Math.min(99, Math.floor(shown));
+    if (integer !== lastInteger) {
+      lastInteger = integer;
+      // 更新 Text 节点，避免触发页面适配器的 childList 观察器。
+      percent.forEach(layer => { layer.firstChild.nodeValue = integer + "%"; });
+      track.setAttribute("aria-valuenow", String(integer));
+    }
+    if (t < 1) frame = requestAnimationFrame(draw);
+    else if (completing && target === 100) leave();
+  }
+  function queueInspect() {
+    if (!finished && !completing && !inspectFrame) inspectFrame = requestAnimationFrame(inspect);
+  }
+  function inspect() {
+    // 轮询也会调用此函数，先取消尚未执行的检查帧以免重复扫描。
+    cancelAnimationFrame(inspectFrame);
+    inspectFrame = 0;
+    if (finished || completing || !panel) return;
+    try {
+      const now = performance.now();
+      if (now - lastAdvance > CONFIG.stalledMs) {
+        console.warn("[NASAPUNK] 首屏检查点长时间无进展，已撤下遮罩以显示原页面；未标记为加载成功。", { checkpoint: target });
+        cancel();
+        return;
+      }
+      if (/\/@(?:manage|init)(?:\/|$)/.test(location.pathname)) { cancel(); return; }
+      let allReady = false;
+      const root = document.getElementById("root");
+      // 遮罩期间不让 Tab 移到被遮住的控件；结束时恢复原来的 inert 状态。
+      for (const node of [root, document.getElementById("nasapunk-footer")]) {
+        if (node && !lockedNodes.has(node)) {
+          lockedNodes.set(node, node.inert);
+          node.inert = true;
+        }
+      }
+      const parsed = document.readyState !== "loading";
+      if (parsed) advance(12);
+      if (parsed && root?.children.length) {
+        advance(28);
+        const login = root.querySelector('input[name="username"], input[name="otp"], #totp');
+        const box = root.querySelector(".obj-box");
+        const shell = root.querySelector(".header, .body");
+        if (visible(login) || visible(shell)) advance(45);
+        const isLogin = /\/@login(?:\/|$)/.test(location.pathname);
+        const view = isLogin ? login : box;
+        // 等待 README / 文件预览也完成；目录树、播放器按钮不阻塞首屏。
+        const busy = Array.from(root.querySelectorAll('.hope-spinner, [aria-busy="true"]')).some(el =>
+          !el.closest('.folder-tree-box, .left-toolbar, button, [role="button"]') && visible(el));
+        const contentReady = visible(view) && (isLogin || box.children.length > 0) && !busy;
+        if (contentReady) {
+          advance(72);
+          const sheets = Array.from(document.querySelectorAll('link[rel~="stylesheet"]')).filter(link =>
+            !link.disabled && (!link.media || matchMedia(link.media).matches));
+          // 错误也是资源的终态，由浏览器使用兜底样式，不永久等待失效链接。
+          const sheetsDone = sheets.filter(link => link.sheet || settledSheets.get(link) === link.href).length;
+          advance(72 + (sheets.length ? 8 * sheetsDone / sheets.length : 8));
+          const fontsDone = !document.fonts || document.fonts.status === "loaded";
+          if (sheetsDone === sheets.length && fontsDone) {
+            advance(86);
+            const images = Array.from(root.querySelectorAll("img")).filter(img => {
+              if (!visible(img) || (!img.currentSrc && !img.getAttribute("src") && !img.getAttribute("srcset"))) return false;
+              const rect = img.getBoundingClientRect();
+              return rect.bottom > 0 && rect.top < innerHeight && rect.right > 0 && rect.left < innerWidth;
+            });
+            const imagesDone = images.filter(img => img.complete).length;
+            advance(86 + (images.length ? 11 * imagesDone / images.length : 11));
+            allReady = imagesDone === images.length;
+            // URL/节点/资源集合变化时重新计稳定窗口，避免 SPA 重定向间隙完成。
+            const signature = location.pathname + location.search + "|" + sheets.map(s => s.href).join("|") + "|" + images.map(img => img.currentSrc || img.src).join("|");
+            if (view !== readyView || signature !== readySignature) {
+              readyView = view;
+              readySignature = signature;
+              readySince = 0;
+            }
+          }
+        }
+      }
+      if (!window.__nasapunkResourcesReady) allReady = false;
+      if (!allReady) { readySince = 0; return; }
+      if (!readySince) readySince = now;
+      if (now - readySince < CONFIG.stableMs || now - mountedAt < (reduced ? 0 : CONFIG.minimumMs)) return;
+      // 完成检查点提交以后，未来再出现的资源属于后续页面活动。
+      completing = true;
+      stopWatching();
+      advance(100);
+    } catch (error) {
+      console.warn("[NASAPUNK] 加载状态检测失败，已撤下遮罩。", error);
+      cancel();
+    }
+  }
+  function syncArtSpacing() {
+    if (!panel || finished) return;
+    // 相邻残影间距为屏宽的 10%，三层共展开 30vw。
+    // 按 SVG 的横向缩放换算距离，独立于标题高度，保持每层间距一致。
+    panel.querySelectorAll(".nasapunk-boot-art svg").forEach(svg => {
+      const scale = svg.getBoundingClientRect().width / svg.viewBox.baseVal.width;
+      if (!scale) return;
+      const step = innerWidth * .10 / scale;
+      svg.querySelectorAll(".nasapunk-art-echo").forEach(echo => {
+        const depth = Number(echo.dataset.nasapunkEchoDepth);
+        echo.style.setProperty("--nasapunk-echo-offset", (step * depth).toFixed(3) + "px");
+      });
+    });
+  }
+  function artwork(word, direction) {
+    // 自绘工业宽体字：固定笔画与切角；SVG 直接内嵌，不产生资源请求。
+    const glyphs = {
+      A: "M0 100V20L20 0H64L84 20V100H58V64H26V100ZM26 24V42H58V24Z",
+      S: "M18 0H84V24H26V38H66L84 56V82L66 100H0V76H58V62H18L0 44V18Z",
+      P: "M0 100V0H64L84 20V48L64 68H26V100ZM26 24V44H58V24Z",
+      K: "M0 0H26V38L57 0H84L44 49L84 100H53L26 64V100H0Z",
+      M: "M0 100V0H22L42 34 62 0H84V100H60V43L42 70 24 43V100Z",
+      O: "M18 0H66L84 18V82L66 100H18L0 82V18ZM28 25V75H56V25Z",
+      N: "M0 100V0H24L60 57V0H84V100H60L24 43V100Z",
+      E: "M0 0H84V24H26V38H74V62H26V76H84V100H0Z",
+      C: "M18 0H84V26H29L26 29V71L29 74H84V100H18L0 82V18Z",
+      L: "M0 0H26V74H84V100H0Z",
+      U: "M0 0H26V73L29 76H55L58 73V0H84V82L66 100H18L0 82Z",
+      D: "M0 0H63L84 21V79L63 100H0ZM26 24V76H53L58 71V29L53 24Z"
+    };
+    const name = word.toLowerCase();
+    const id = "nasapunk-art-word-" + name;
+    const width = word.length * 96 - 12;
+    const step = 54; // 首次布局前的默认值，挂载后按屏宽计算实际间距
+    const paths = Array.from(word).map((letter, index) =>
+      '<path transform="translate(' + (index * 96) + ' 0)" d="' + glyphs[letter] + '"/>').join("");
+    // NASA 残影向右展开，PUNK 残影向左展开；屏幕从左到右为绿、黄、红。
+    const colors = direction > 0 ? ["mint", "ochre", "red"] : ["red", "ochre", "mint"];
+    const opacityLevels = ["near", "middle", "far"];
+    // 远 → 近 → 主字；半透明残影自然叠色，最上层不透明主字遮住下方残影。
+    const echoes = [3, 2, 1].map(index =>
+      '<g class="nasapunk-art-echo" data-nasapunk-echo-depth="' + (direction * index) + '" style="--nasapunk-echo-opacity:var(--nasapunk-echo-' + opacityLevels[index - 1] + ');--nasapunk-echo-offset:' + (direction * step * index) +
+      'px;--nasapunk-echo-delay:' + (.28 + index * .08).toFixed(2) + 's;--nasapunk-echo-color:var(--nasapunk-' + colors[index - 1] +
+      ')"><use href="#' + id + '"/></g>').join("");
+    return '<div class="nasapunk-boot-art nasapunk-boot-art--' + name + '" style="--nasapunk-art-ratio:' + width + ' / 100" aria-hidden="true">' +
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + width + ' 100" preserveAspectRatio="xMidYMid meet" focusable="false">' +
+      '<defs><g id="' + id + '" fill-rule="evenodd">' + paths + '</g></defs>' +
+      '<g>' + echoes +
+      '<g class="nasapunk-art-front"><use class="nasapunk-art-front-base" href="#' + id + '"/>' +
+      '<use class="nasapunk-art-front-ink" href="#' + id + '"/></g></g></svg></div>';
+  }
+  function mount() {
+    if (finished || panel || !document.body) return;
+    if (!CONFIG.enabled) { cancel(); return; }
+    observer?.disconnect();
+    mountedAt = lastAdvance = performance.now();
+    panel = document.createElement("div");
+    panel.id = "nasapunk-boot";
+    panel.innerHTML = '<div class="nasapunk-cross-grid" aria-hidden="true">' + "<i></i>".repeat(15) + "</div>" + artwork("NASA", 1) + artwork("PUNK", -1) +
+      '<div class="nasapunk-boot-stripes" aria-hidden="true"><i></i><i></i><i></i></div>' +
+      '<div class="nasapunk-boot-instrument"><span class="nasapunk-boot-legend" aria-hidden="true">LOADING</span>' +
+      '<div class="nasapunk-boot-track" role="progressbar" aria-label="首屏准备进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">' +
+      '<div class="nasapunk-boot-fill" aria-hidden="true"><span class="nasapunk-boot-half"></span><span class="nasapunk-boot-half"></span></div>' +
+      '<span class="nasapunk-boot-percent" aria-hidden="true">0%</span>' +
+      '<span class="nasapunk-boot-percent nasapunk-boot-percent--left" aria-hidden="true">0%</span>' +
+      '<span class="nasapunk-boot-percent nasapunk-boot-percent--right" aria-hidden="true">0%</span></div></div>';
+    track = panel.querySelector(".nasapunk-boot-track");
+    percent = panel.querySelectorAll(".nasapunk-boot-percent");
+    panel.addEventListener("animationend", onBootAnimation);
+    panel.addEventListener("animationcancel", onBootAnimation);
+    document.body.appendChild(panel);
+    if (reduced) startArt();
+    syncArtSpacing();
+    window.addEventListener("resize", syncArtSpacing);
+    window.addEventListener("pagehide", cancel);
+    observer = new MutationObserver(records => {
+      // 自己的百分比文本变化不触发重新扫描整个页面。
+      if (records.some(record => !panel.contains(record.target))) queueInspect();
+    });
+    observer.observe(html, { childList: true, subtree: true });
+    document.addEventListener("load", onResource, true);
+    document.addEventListener("error", onResource, true);
+    document.addEventListener("DOMContentLoaded", queueInspect);
+    document.fonts?.addEventListener("loadingdone", queueInspect);
+    document.fonts?.addEventListener("loadingerror", queueInspect);
+    // 轮询只检查就绪状态，不按时间自增百分比。
+    watchTimer = setInterval(inspect, 150);
+    advance(5);
+    inspect();
+  }
+  // document.body 可用时挂载首屏遮罩，不依赖 body 入口脚本。
+  observer = new MutationObserver(mount);
+  observer.observe(html, { childList: true, subtree: true });
+  mount();
+})();
+
+</script>
+<script>
 window.__nasapunkAssetsReady = new Promise(resolve => {
+  let settled = false;
   const base = (window.NASAPUNK_CONFIG.assetBase || "").replace(/\/$/, "");
-  if (!base) { console.warn("NASAPUNK: 请先填写 assetBase，指向已上传的 src 目录。"); resolve(false); return; }
+  const fail = () => {
+    if (settled) return;
+    settled = true;
+    clearTimeout(timer);
+    document.documentElement.removeAttribute("data-nasapunk-assets-pending");
+    window.__nasapunkBoot?.finish();
+    resolve(false);
+  };
+  const timer = setTimeout(fail, window.NASAPUNK_CONFIG.loading?.stalledMs || 40000);
+  window.__nasapunkAssetFailure = fail;
+  window.__nasapunkPageLoaded = () => {
+    if (settled) return;
+    settled = true; clearTimeout(timer);
+    window.__nasapunkResourcesReady = true;
+    document.documentElement.removeAttribute("data-nasapunk-assets-pending");
+  };
+  if (!base) { fail(); return; }
   const css = document.createElement("link"); css.id = "nasapunk-stylesheet"; css.rel = "stylesheet"; css.href = base + "/nasapunk.css";
-  css.onerror = () => { console.error("NASAPUNK: 样式加载失败", css.href); resolve(false); };
+  css.onerror = fail;
   css.onload = () => {
+    if (settled) return;
     const script = document.createElement("script"); script.src = base + "/nasapunk-head.js";
-    script.onload = () => resolve(true);
-    script.onerror = () => { window.__nasapunkBoot?.finish(); resolve(false); };
+    script.onload = () => { if (!settled) resolve(true); };
+    script.onerror = fail;
     document.head.append(script);
   };
   document.head.append(css);
