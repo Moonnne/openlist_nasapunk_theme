@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1024" height="1024" viewBox="0 0 1254 1254"
+     role="img" aria-label="NASAPUNK emblem: N-shaped monogram, rising spacecraft, and three colored exhaust trails">
+  <title>NASAPUNK</title>
+  <desc>Original geometric N monogram with an upward spacecraft carved in negative space and three flat colored exhaust trails.</desc>
+
+  <!-- Solid N monogram; the ascending spacecraft is the open negative space. -->
+  <path fill="#2b302e" d="
+    M 281 229
+    H 485
+    Q 496 229 505 237
+    L 755 455
+    V 254
+    Q 755 229 781 229
+    H 938
+    Q 948 229 955 237
+    L 985 269
+    Q 992 275 992 287
+    V 895
+    Q 992 917 971 917
+    H 914
+    Q 902 917 895 910
+    L 677 701
+    Q 672 696 672 686
+    V 660
+    Q 672 652 680 657
+    L 743 701
+    Q 752 707 752 695
+    V 637
+    Q 752 625 745 616
+    L 682 546
+    Q 675 541 675 529
+    V 453
+    Q 675 442 670 434
+    Q 645 387 627 370
+    Q 622 365 617 372
+    Q 593 397 576 433
+    Q 570 442 570 453
+    V 530
+    Q 570 539 563 546
+    L 502 613
+    Q 492 624 492 636
+    V 695
+    Q 492 707 501 701
+    L 565 657
+    Q 577 650 577 661
+    V 687
+    Q 577 695 571 701
+    L 495 778
+    Q 485 788 485 802
+    V 895
+    Q 485 917 464 917
+    H 326
+    Q 316 917 308 909
+    L 265 866
+    Q 258 859 258 849
+    V 253
+    Q 258 229 281 229
+    Z"/>
+
+  <!-- The three separately editable exhaust bands: mint, ochre, brick red. -->
+  <path fill="#87bdae" d="
+    M 576 716
+    L 523 767
+    Q 517 773 517 784
+    L 516 951
+    Q 516 965 506 976
+    L 499 983
+    Q 491 991 491 1004
+    V 1012
+    Q 491 1034 514 1034
+    H 547
+    Q 577 1034 577 1006
+    V 716
+    Z"/>
+
+  <path fill="#e4ab3c" d="
+    M 605 679
+    H 641
+    Q 650 679 650 689
+    L 655 1010
+    Q 655 1034 635 1034
+    H 614
+    Q 594 1034 594 1011
+    L 596 689
+    Q 596 679 605 679
+    Z"/>
+
+  <path fill="#a3372b" d="
+    M 671 716
+    L 726 767
+    Q 732 773 732 784
+    L 733 951
+    Q 733 966 744 977
+    Q 758 990 758 1006
+    V 1014
+    Q 758 1034 736 1034
+    H 704
+    Q 672 1034 672 1007
+    Z"/>
+</svg>

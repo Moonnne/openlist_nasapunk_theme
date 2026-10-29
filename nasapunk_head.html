@@ -1,0 +1,109 @@
+<!-- OpenList 自定义头部：配置和字体/颜色可在此修改；默认直接使用本仓库资源；Fork 自定义时修改 assetBase。 -->
+<script id="nasapunk-config">
+/* 站点配置
+   背景图片：填写你自己的图片 URL；留空或加载失败时将回退到默认纯色主题。
+   main 和 footer 完全独立；color 留空跟随明暗主题，也可填写 CSS 颜色。
+   size 可填 cover / contain，position 可填 center / center top。
+   logoUrl 默认相对 assetBase 解析；留空沿用 OpenList 的 Logo 与 favicon。
+   startedAt 留空隐藏运行时间；填写时使用包含时区的 ISO 日期。
+*/
+window.NASAPUNK_CONFIG = {
+  assetBase: "https://cdn.jsdelivr.net/gh/Moonnne/openlist_nasapunk_theme@main/src", // 默认使用本仓库 CDN；Fork 后改成自己的仓库地址（末尾 / 可省略）
+  logoUrl: "nasapunk-icon.svg", // 顶栏、登录页、页脚和 favicon；也可填写完整 URL
+  loading: { enabled: true, minimumMs: 1800, stableMs: 180, completeHoldMs: 180, stalledMs: 40000 },
+  pageTransitions: true, // 页面切换动画
+  themeTransitions: true, // 全屏日月主题切换动画
+  pageRibbon: true, // 导航右侧三色带向页面延伸；true 开启，false 关闭
+  userIconUrl: "https://cdn.jsdelivr.net/npm/@tabler/icons@3.35.0/icons/outline/user.svg", // 账户图标 CDN；加载失败时使用内联兜底
+  selectionUnderline: true, // true：固定厚度的拖选下划线；false：原生色块选区（OpenList 主颜色）
+  startedAt: "",
+  backgrounds: {
+    main:   { url: "", color: "", size: "cover", position: "center" },
+    footer: { url: "", color: "", size: "cover", position: "center" }
+  }
+};
+</script>
+<style id="nasapunk-font-config">
+/* 字体配置
+   每项可填写多个字体，例如："Outfit", "Noto Sans SC"。
+   未安装的字体不会自动下载；外部字体通过 @font-face 声明，并确保具有 Web 分发许可。
+   各分区默认继承全局兜底字体，独立于 OpenList 的字体设置。
+   若要某分区重新使用全局兜底，填写 var(--nasapunk-font-fallback)，不要留空。
+   正文规则涵盖宿主页面可选择的文字；iframe 内文、PDF 画布、图片文字、
+   封闭 Shadow DOM 不受宿主页 CSS 控制。图标字体、数学公式保留专用字形。
+   需要精确字体度量的 Monaco / Ace 编辑器也保留自己的字体配置。
+*/
+:root {
+  --nasapunk-font-fallback: "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --nasapunk-font-ui: var(--nasapunk-font-fallback);       /* 普通界面、按钮与输入框 */
+  --nasapunk-font-heading: var(--nasapunk-font-fallback);  /* 标题 */
+  --nasapunk-font-files: var(--nasapunk-font-fallback);    /* 文件名、目录树 */
+  --nasapunk-font-metadata: var(--nasapunk-font-fallback); /* 文件大小、日期 */
+  --nasapunk-font-preview: var(--nasapunk-font-fallback);  /* 文件预览区的一般文字 */
+  --nasapunk-font-reading: var(--nasapunk-font-fallback);  /* Markdown / README 正文 */
+  --nasapunk-font-code: "Cascadia Mono", Consolas, "Liberation Mono", monospace;
+  --nasapunk-font-login: var(--nasapunk-font-fallback);    /* 登录、验证码 */
+  --nasapunk-font-popup: var(--nasapunk-font-fallback);    /* 弹窗、菜单、抽屉、通知 */
+  --nasapunk-font-label: "Arial Black", "Helvetica Neue", Arial, "Microsoft YaHei", sans-serif;
+  --nasapunk-font-footer: var(--nasapunk-font-fallback);   /* 自定义页脚 */
+}
+</style>
+<style id="nasapunk-color-config">
+/* 颜色与面板配置 */
+:root {
+  --nasapunk-day-paper: #ece5d6;
+  --nasapunk-night-paper: #202523;
+  --nasapunk-paper: var(--nasapunk-day-paper);
+  --nasapunk-panel: #f4efdf;
+  --nasapunk-recess: #e2dece;
+  --nasapunk-hover: #dbd8c9;
+  --nasapunk-ink: #2b302e;
+  --nasapunk-muted: #63675e;
+  --nasapunk-line: #a4a598;
+  --nasapunk-edge: #4b514a;
+  --nasapunk-accent: var(--nasapunk-site-accent, currentColor);
+  --nasapunk-selected: color-mix(in srgb, var(--nasapunk-accent) 14%, var(--nasapunk-panel));
+  --nasapunk-mint: #87bdae;
+  --nasapunk-ochre: #e4ab3c;
+  --nasapunk-red: #a3372b;
+  --nasapunk-shadow: 3px 3px 0 #b6b5a6;
+  --nasapunk-radius: 2px;
+  --nasapunk-folder-cover: #d2c6ad;
+  --nasapunk-reading-size: 16px;
+  --nasapunk-selection-thickness: 3.2px; /* 选区下划线使用固定厚度，不随选中文字的字号变化。 */
+  --nasapunk-reading-leading: 1.8;
+}
+
+/* 暗色：石墨设备面板，保留与浅色相同的三色标记。 */
+html[data-nasapunk-mode="dark"] {
+  --nasapunk-paper: var(--nasapunk-night-paper);
+  --nasapunk-panel: #2a302d;
+  --nasapunk-recess: #242a27;
+  --nasapunk-hover: #383e37;
+  --nasapunk-ink: #ece5d6;
+  --nasapunk-muted: #b4b6a7;
+  --nasapunk-line: #596055;
+  --nasapunk-edge: #9ba18e;
+  --nasapunk-accent: var(--nasapunk-site-accent, currentColor);
+  --nasapunk-selected: color-mix(in srgb, var(--nasapunk-accent) 14%, var(--nasapunk-panel));
+  --nasapunk-shadow: 3px 3px 0 #121613;
+  --nasapunk-folder-cover: #4a5048;
+}
+
+</style>
+<script>
+// 共用一个 CDN 基址；加载失败时保留原生页面，避免遮罩锁住页面。
+window.__nasapunkAssetsReady = new Promise(resolve => {
+  const base = (window.NASAPUNK_CONFIG.assetBase || "").replace(/\/$/, "");
+  if (!base) { console.warn("NASAPUNK: 请先填写 assetBase，指向已上传的 src 目录。"); resolve(false); return; }
+  const css = document.createElement("link"); css.id = "nasapunk-stylesheet"; css.rel = "stylesheet"; css.href = base + "/nasapunk.css";
+  css.onerror = () => { console.error("NASAPUNK: 样式加载失败", css.href); resolve(false); };
+  css.onload = () => {
+    const script = document.createElement("script"); script.src = base + "/nasapunk-head.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => { window.__nasapunkBoot?.finish(); resolve(false); };
+    document.head.append(script);
+  };
+  document.head.append(css);
+});
+</script>

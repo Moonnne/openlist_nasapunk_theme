@@ -1,0 +1,1049 @@
+/* 仅覆盖字体令牌；主题色、文件夹图标和状态色继续由 OpenList 配置。 */
+html[data-nasapunk-theme],
+html[data-nasapunk-theme] :is(body, .hope-ui-light, .hope-ui-dark) {
+  --nasapunk-accent: var(--nasapunk-site-accent, currentColor);
+  --nasapunk-selected: color-mix(in srgb, var(--nasapunk-accent) 14%, var(--nasapunk-panel));
+  --hope-fonts-body: var(--nasapunk-font-ui) !important;
+  --hope-fonts-heading: var(--nasapunk-font-heading) !important;
+  --hope-fonts-mono: var(--nasapunk-font-code) !important;
+}
+
+/* 分区字体
+   后代文字共享分区变量，覆盖 OpenList 的显式 font-family。
+   自定义分区可用 data-nasapunk-font="reading|preview|code|ui"，或在末尾添加
+   自己的选择器 { --nasapunk-font-active: "你的字体"; }。
+*/
+html[data-nasapunk-theme] {
+  --nasapunk-font-active: var(--nasapunk-font-ui);
+  font-family: var(--nasapunk-font-fallback) !important;
+  background: var(--nasapunk-paper);
+  color: var(--nasapunk-ink);
+}
+html[data-nasapunk-theme] body,
+html[data-nasapunk-theme] body *:not(:where(
+  svg, svg *, math, math *, .katex, .katex *, .MathJax, .MathJax *, mjx-container, mjx-container *,
+  .monaco-editor, .monaco-editor *, .ace_editor, .ace_editor *,
+  .fa, .fas, .far, .fab, .fal, .fad, .fat, [class*="fa-"], [class*="iconfont"],
+  .material-icons, .material-symbols-outlined, [data-nasapunk-keep-font], [data-nasapunk-keep-font] *
+)) {
+  font-family: var(--nasapunk-font-active, var(--nasapunk-font-fallback)), var(--nasapunk-font-fallback) !important;
+}
+html[data-nasapunk-theme] :is(.obj-box, [data-nasapunk-font="preview"]) { --nasapunk-font-active: var(--nasapunk-font-preview); }
+html[data-nasapunk-theme] :is(.list-item, .grid-item, .folder-tree-box, [data-nasapunk-font="files"]) { --nasapunk-font-active: var(--nasapunk-font-files); }
+html[data-nasapunk-theme] :is(.size, .modified, .disk-usage-text) { --nasapunk-font-active: var(--nasapunk-font-metadata); font-variant-numeric: tabular-nums; }
+html[data-nasapunk-theme] :is(.markdown-body, [data-nasapunk-font="reading"]) { --nasapunk-font-active: var(--nasapunk-font-reading); }
+html[data-nasapunk-theme] :is(h1, h2, h3, h4, h5, h6, .hope-heading) { --nasapunk-font-active: var(--nasapunk-font-heading); }
+html[data-nasapunk-theme] :is(button, input, textarea, select, [data-nasapunk-font="ui"]) { --nasapunk-font-active: var(--nasapunk-font-ui); }
+html[data-nasapunk-theme] :is(.hope-modal__content, .hope-drawer__content, .hope-menu__content, .hope-popover__content, .hope-select__content, .hope-notification, [role="dialog"], [role="alertdialog"], [role="menu"], [role="listbox"]) { --nasapunk-font-active: var(--nasapunk-font-popup); }
+html[data-nasapunk-theme] :is([role="dialog"], [role="alertdialog"], .hope-drawer__content) :is(input, textarea, button, .hope-heading) { --nasapunk-font-active: var(--nasapunk-font-popup); }
+html[data-nasapunk-theme] [data-nasapunk-login-card],
+html[data-nasapunk-theme] [data-nasapunk-login-card] :is(input, button, .hope-heading) { --nasapunk-font-active: var(--nasapunk-font-login); }
+html[data-nasapunk-theme] :is(pre, code, kbd, samp, .cm-editor, .cm-content, [data-nasapunk-font="code"]) { --nasapunk-font-active: var(--nasapunk-font-code); }
+html[data-nasapunk-theme] #nasapunk-footer { --nasapunk-font-active: var(--nasapunk-font-footer); }
+
+/* 页面：哑光底板、硬边、细刻线 */
+html[data-nasapunk-theme] body {
+  background-color: var(--nasapunk-main-color, var(--nasapunk-paper)) !important;
+  background-image: var(--nasapunk-main-image, none) !important;
+  background-size: var(--nasapunk-main-image-size, cover) !important;
+  background-position: var(--nasapunk-main-image-position, center) !important;
+  background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
+  color: var(--nasapunk-ink) !important;
+  margin: 0;
+  min-height: 100vh;
+  height: auto !important; /* 长页面不得从固定 body 高度溢出，否则背景图会提前结束。 */
+  -webkit-font-smoothing: antialiased;
+}
+html[data-nasapunk-theme] #root { position: relative; min-height: 0 !important; }
+html[data-nasapunk-theme] .body, html[data-nasapunk-theme] [data-nasapunk-flow-shell] { min-height: 0 !important; }
+html[data-nasapunk-theme] [data-nasapunk-flow-root] { display: flex; flex-direction: column; min-height: var(--nasapunk-flow-min-height, 100svh) !important; height: auto !important; }
+html[data-nasapunk-theme] [data-nasapunk-flow-main] { flex: 1 0 auto; min-height: 0 !important; }
+html[data-nasapunk-theme] [data-nasapunk-flow-footer] { flex: 0 0 auto; }
+/* 鼠标拖选文字的原生选区；不将 hover / 文件选中误当作文字选区。
+   使用 ::selection，保留浏览器的跨行选择、复制和取消选择行为。
+   https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/::selection */
+html[data-nasapunk-theme] ::selection {
+  background-color: var(--nasapunk-accent);
+  color: inherit;
+  text-decoration: none;
+}
+html[data-nasapunk-theme][data-nasapunk-selection="underline"] ::selection {
+  background-color: transparent;
+  color: inherit;
+  text-decoration: underline solid var(--nasapunk-accent) var(--nasapunk-selection-thickness);
+  text-underline-offset: -2px;
+  text-decoration-skip-ink: none;
+}
+html[data-nasapunk-theme] :is(button, a, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--nasapunk-accent);
+  outline-offset: 2px;
+}
+html[data-nasapunk-theme] .header {
+  color: var(--nasapunk-ink) !important;
+  background: var(--nasapunk-panel) !important;
+  border-bottom: 6px solid transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+/* 三条细线沿底边铺满，再在最右侧直角向上包裹顶栏。 */
+html[data-nasapunk-theme] .header[data-nasapunk-header-static] { position: relative; }
+.nasapunk-header-ribbon { position: absolute; inset: 0 0 -6px; pointer-events: none; overflow: hidden; }
+.nasapunk-header-ribbon i { position: absolute; inset: 0; }
+.nasapunk-header-ribbon i:nth-child(1) {
+  background: var(--nasapunk-mint);
+  clip-path: polygon(0 calc(100% - 6px), calc(100% - 6px) calc(100% - 6px), calc(100% - 6px) 0, calc(100% - 4px) 0, calc(100% - 4px) calc(100% - 4px), 0 calc(100% - 4px));
+}
+.nasapunk-header-ribbon i:nth-child(2) {
+  background: var(--nasapunk-ochre);
+  clip-path: polygon(0 calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 0, calc(100% - 2px) 0, calc(100% - 2px) calc(100% - 2px), 0 calc(100% - 2px));
+}
+.nasapunk-header-ribbon i:nth-child(3) {
+  background: var(--nasapunk-red);
+  clip-path: polygon(0 calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) 0, 100% 0, 100% 100%, 0 100%);
+}
+
+/* 区域标题下嵌 35%，留白按标题高度计算。 */
+.nasapunk-section-heading {
+  --nasapunk-font-active: var(--nasapunk-font-label);
+  --nasapunk-section-title-size: clamp(24px, 2.4vw, 34px);
+  position: relative; z-index: 2; box-sizing: border-box; flex: 0 0 auto;
+  width: 100%; height: var(--nasapunk-section-title-size); line-height: 1;
+  margin: calc(var(--nasapunk-section-title-size) * -.1) 0 calc(var(--nasapunk-section-title-size) * -.35 - var(--nasapunk-section-gap, 0px));
+  padding-left: var(--nasapunk-section-inset, 66px);
+  font-family: var(--nasapunk-font-label); font-size: var(--nasapunk-section-title-size);
+  font-weight: 900; font-style: italic; letter-spacing: -.06em; text-transform: uppercase;
+  color: var(--nasapunk-ink); pointer-events: none; user-select: none;
+}
+html[data-nasapunk-theme] [data-nasapunk-section-panel] { position: relative; }
+/* 与原生工具栏一致：按下轻微缩小，释放后平滑回弹。 */
+html[data-nasapunk-theme] .header-right [data-nasapunk-header-control] {
+  transform: scale(1) !important; transform-origin: center;
+  transition: transform 200ms ease, background-color 150ms ease, border-color 150ms ease !important;
+}
+html[data-nasapunk-theme] .header-right [data-nasapunk-header-control]:active:not(:disabled):not([aria-disabled="true"]) { transform: scale(.9) !important; box-shadow: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  html[data-nasapunk-theme] .header-right [data-nasapunk-header-control] { transition: none !important; }
+}
+
+html[data-nasapunk-theme] .hope-breadcrumb {
+  background: var(--nasapunk-panel) !important;
+  border: 1px solid var(--nasapunk-line);
+  border-left: 0;
+  position: relative;
+  border-radius: var(--nasapunk-radius) !important;
+  padding: 10px calc(clamp(72px, 20vw, 300px) + 18px) 10px 14px;
+  box-shadow: var(--nasapunk-shadow) !important;
+  backdrop-filter: none !important;
+}
+html[data-nasapunk-theme] .obj-box {
+  background: var(--nasapunk-panel) !important;
+  border: 1px solid var(--nasapunk-edge);
+  border-radius: var(--nasapunk-radius) !important;
+  box-shadow: var(--nasapunk-shadow) !important;
+}
+html[data-nasapunk-theme] .obj-box { padding: clamp(8px, 1.4vw, 18px) !important; }
+html[data-nasapunk-theme] :is(.list-item, .grid-item) {
+  color: var(--nasapunk-ink) !important;
+  border-radius: var(--nasapunk-radius) !important;
+  border: 1px solid transparent;
+  transition: background-color .15s, border-color .15s !important;
+}
+html[data-nasapunk-theme] .list-item { min-height: 48px; border-bottom-color: var(--nasapunk-line); }
+html[data-nasapunk-theme] :is(.list-item, .grid-item):hover {
+  background: var(--nasapunk-selected) !important;
+  transform: none !important;
+}
+html[data-nasapunk-theme] :is(.list-item, .grid-item).selected {
+  background: var(--nasapunk-selected) !important;
+  box-shadow: none !important;
+}
+html[data-nasapunk-theme] :is(.size, .modified) { color: var(--nasapunk-muted); }
+
+/* 控件：保留原操作、禁用、错误、选中语义 */
+html[data-nasapunk-theme] :is(.hope-button, .hope-icon-button, .hope-select__trigger) {
+  border: 1px solid var(--nasapunk-line) !important;
+  border-radius: var(--nasapunk-radius) !important;
+  box-shadow: 0 2px 0 var(--nasapunk-line) !important;
+  transition: background-color .15s, border-color .15s !important;
+  font-weight: 600;
+}
+html[data-nasapunk-theme] :is(.hope-button, .hope-icon-button):active:not(:disabled) {
+  transform: translateY(1px) !important;
+  box-shadow: none !important;
+}
+html[data-nasapunk-theme] :is(button:disabled, [aria-disabled="true"]) { opacity: .5; cursor: not-allowed; }
+html[data-nasapunk-theme] :is(.hope-input, .hope-textarea, .hope-select__trigger) {
+  background: var(--nasapunk-recess) !important;
+  color: var(--nasapunk-ink) !important;
+  border: 1px solid var(--nasapunk-line) !important;
+  border-radius: var(--nasapunk-radius) !important;
+  box-shadow: inset 0 2px 0 rgba(30, 34, 28, .06) !important;
+}
+html[data-nasapunk-theme] :is(.hope-input, .hope-textarea)::placeholder { color: var(--nasapunk-muted); opacity: .85; }
+html[data-nasapunk-theme] :is(.hope-input, .hope-textarea):focus { border-color: var(--nasapunk-accent) !important; }
+html[data-nasapunk-theme] :is(.hope-input, .hope-textarea)[aria-invalid="true"] { border-color: var(--hope-colors-danger9, #a3372b) !important; }
+html[data-nasapunk-theme] :is(.hope-checkbox__control, .hope-switch__track, .hope-switch__thumb, .hope-badge, .hope-progress, .hope-progress__indicator) { border-radius: var(--nasapunk-radius) !important; }
+html[data-nasapunk-theme] .hope-checkbox__control { border-width: 1px !important; }
+html[data-nasapunk-theme] .hope-tabs__tab[aria-selected="true"] {
+  color: var(--nasapunk-accent) !important;
+  border-bottom: 3px solid var(--nasapunk-accent) !important;
+}
+
+/* 弹窗、搜索、侧栏：含 Portal 挂载到 body 的组件 */
+html[data-nasapunk-theme] :is(.hope-modal__content, .hope-drawer__content, .hope-popover__content, .hope-menu__content, .hope-select__content, [role="dialog"], [role="alertdialog"], [role="menu"], [role="listbox"]) {
+  background: var(--nasapunk-panel) !important;
+  color: var(--nasapunk-ink) !important;
+  border: 1px solid var(--nasapunk-edge) !important;
+  border-radius: var(--nasapunk-radius) !important;
+  box-shadow: var(--nasapunk-shadow) !important;
+  backdrop-filter: none !important;
+}
+html[data-nasapunk-theme] :is(.hope-modal__header, .hope-drawer__header, .hope-popover__header) {
+  border-bottom: 1px solid var(--nasapunk-line);
+  border-left: 0;
+  position: relative;
+  font-weight: 800 !important;
+  letter-spacing: .03em;
+  padding-right: 52px;
+}
+html[data-nasapunk-theme] :is(.hope-modal__footer, .hope-drawer__footer) { border-top: 1px solid var(--nasapunk-line); }
+html[data-nasapunk-theme] :is(.hope-modal__overlay, .hope-drawer__overlay) {
+  background: rgba(25, 30, 27, .56) !important;
+  backdrop-filter: none !important;
+}
+html[data-nasapunk-theme] :is(.hope-menu__item, .hope-select__option) { border-radius: 0 !important; }
+html[data-nasapunk-theme] :is(.hope-menu__item, .hope-select__option):is(:hover, [data-highlighted], [data-focus], [aria-selected="true"]) {
+  color: var(--nasapunk-ink) !important;
+  background: var(--nasapunk-selected) !important;
+}
+html[data-nasapunk-theme] :is(.hope-notification, .hope-alert) {
+  border-radius: var(--nasapunk-radius) !important;
+  border: 1px solid var(--nasapunk-line) !important;
+  box-shadow: var(--nasapunk-shadow) !important;
+}
+html[data-nasapunk-theme] .hope-tooltip {
+  background: var(--nasapunk-ink) !important;
+  color: var(--nasapunk-panel) !important;
+  border-radius: 1px !important;
+}
+html[data-nasapunk-theme] [data-nasapunk-sidebar] {
+  background: var(--nasapunk-panel) !important;
+  color: var(--nasapunk-ink) !important;
+  border: 1px solid var(--nasapunk-edge);
+  border-top: 0;
+  padding-top: 4px;
+  border-radius: var(--nasapunk-radius) !important;
+  box-shadow: var(--nasapunk-shadow) !important;
+}
+/* 外层卡片始终可见；左侧三条竖色带横向并排，图标列靠右。 */
+html[data-nasapunk-theme] .left-toolbar-box {
+  right: 0 !important; box-sizing: border-box; width: 66px !important;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 7px 0 7px 12px !important; min-height: 48px;
+  background: var(--nasapunk-panel) !important; color: var(--nasapunk-accent);
+  border: 1px solid var(--nasapunk-edge); border-right: 0;
+  border-radius: var(--nasapunk-radius) 0 0 var(--nasapunk-radius) !important;
+  box-shadow: var(--nasapunk-shadow); transform-origin: right bottom;
+}
+html[data-nasapunk-theme] .left-toolbar-box::before {
+  content: ""; position: absolute; inset: 0 auto 0 0; width: 12px;
+  background: linear-gradient(90deg, var(--nasapunk-mint) 0 33.333%, var(--nasapunk-ochre) 33.333% 66.666%, var(--nasapunk-red) 66.666%);
+  pointer-events: none;
+}
+html[data-nasapunk-theme] .left-toolbar {
+  position: relative; width: 100% !important; padding: 0 !important; margin: 0 !important;
+  align-items: center !important; border: 0 !important; border-radius: 0 !important;
+  background: transparent !important; box-shadow: none !important;
+  opacity: 1 !important; transform: none !important;
+}
+html[data-nasapunk-theme] .left-toolbar-in { width: 100%; align-items: center !important; }
+html[data-nasapunk-theme] .left-toolbar-box > .toolbar-toggle { flex-shrink: 0; margin: 0; align-self: center; }
+html[data-nasapunk-theme] .left-toolbar-box::after {
+  content: "SETTINGS"; position: absolute;
+  left: calc(8px - .5em); top: var(--nasapunk-settings-center, 0px);
+  transform: translate(-50%, calc(-50% + 8px)) rotate(-90deg);
+  font-family: var(--nasapunk-font-label);
+  font-size: clamp(19px, 2vw, 26px); font-weight: 900; font-style: italic;
+  line-height: 1; letter-spacing: -.06em; white-space: nowrap;
+  color: var(--nasapunk-ink); pointer-events: none; opacity: 0;
+  transition: opacity 260ms cubic-bezier(.4,0,.2,1), transform 260ms cubic-bezier(.4,0,.2,1);
+}
+html[data-nasapunk-theme] .left-toolbar-box[data-nasapunk-toolbar-open]::after { opacity: 1; transform: translate(-50%, -50%) rotate(-90deg); transition-duration: 300ms; transition-timing-function: cubic-bezier(.2,.7,.2,1); }
+@media (prefers-reduced-motion: reduce) {
+  html[data-nasapunk-theme] .left-toolbar-box::after { transition: none; }
+}
+html[data-nasapunk-theme] :is(.left-toolbar svg, .toolbar-toggle) {
+  border-radius: var(--nasapunk-radius) !important;
+}
+html[data-nasapunk-theme] [data-nasapunk-sidebar] { max-width: min(340px, calc(100vw - 32px)); }
+html[data-nasapunk-theme] .folder-tree-box .hope-text { border-radius: 1px !important; }
+
+/* 预览与 README：只改外壳，保留语法高亮及媒体颜色 */
+html[data-nasapunk-theme] .markdown-body {
+  color: var(--nasapunk-ink) !important;
+  font-size: var(--nasapunk-reading-size);
+  line-height: var(--nasapunk-reading-leading);
+}
+html[data-nasapunk-theme] .markdown-body a { color: var(--nasapunk-accent); text-decoration: underline; text-underline-offset: 3px; }
+html[data-nasapunk-theme] .markdown-body :is(h1, h2, hr, th, td) { border-color: var(--nasapunk-line) !important; }
+html[data-nasapunk-theme] .markdown-body blockquote { border-left-color: var(--nasapunk-mint); color: var(--nasapunk-muted); }
+html[data-nasapunk-theme] .markdown-body table tr { background: var(--nasapunk-panel); }
+html[data-nasapunk-theme] .markdown-body table tr:nth-child(2n) { background: var(--nasapunk-recess); }
+html[data-nasapunk-theme] .markdown-body :is(pre, kbd) {
+  background: var(--nasapunk-recess) !important;
+  border: 1px solid var(--nasapunk-line);
+  border-radius: var(--nasapunk-radius) !important;
+}
+html[data-nasapunk-theme] .markdown-body pre code.hljs { background: transparent; }
+
+/* 顶栏按钮使用透明背景，点击行为由原生组件处理。 */
+html[data-nasapunk-theme] .header :is(button, .hope-icon-button, [role="button"]),
+html[data-nasapunk-theme] #nasapunk-theme-toggle {
+  border: 0 !important; box-shadow: none !important; background: transparent !important;
+  border-radius: 0 !important;
+}
+#nasapunk-theme-toggle { display: inline-grid; place-items: center; flex: 0 0 auto; width: 36px; height: 36px; padding: 7px; margin-right: 8px; color: var(--nasapunk-accent) !important; cursor: pointer; }
+#nasapunk-theme-toggle svg { width: 22px; height: 22px; }
+#nasapunk-theme-toggle .nasapunk-moon { display: none; }
+html[data-nasapunk-mode="dark"] #nasapunk-theme-toggle .nasapunk-sun { display: none; }
+html[data-nasapunk-mode="dark"] #nasapunk-theme-toggle .nasapunk-moon { display: block; }
+html[data-nasapunk-theme] .hope-breadcrumb::before {
+  content: ""; position: absolute; inset: 0 auto 0 0; width: 4px; pointer-events: none;
+  background: linear-gradient(180deg, var(--nasapunk-mint) 0 33.333%, var(--nasapunk-ochre) 33.333% 66.666%, var(--nasapunk-red) 66.666%);
+}
+html[data-nasapunk-theme] [data-nasapunk-sidebar]::before {
+  content: ""; position: absolute; inset: 0 0 auto; height: 4px; pointer-events: none;
+  background: linear-gradient(90deg, var(--nasapunk-mint) 0 33.333%, var(--nasapunk-ochre) 33.333% 66.666%, var(--nasapunk-red) 66.666%);
+}
+html[data-nasapunk-theme] .left-toolbar::before { content: none; }
+/* 直接装饰原组件外壳，不搬动 SolidJS 管理的内容节点。 */
+html[data-nasapunk-theme] [data-nasapunk-md-panel] {
+  position: relative; isolation: isolate; overflow: visible !important;
+  margin-top: 48px !important; padding: clamp(16px, 2vw, 28px) !important;
+  color: var(--nasapunk-ink) !important; background: var(--nasapunk-panel) !important;
+  border: clamp(12px, 1.15vw, 18px) solid var(--nasapunk-folder-cover) !important; border-radius: 3px !important;
+  outline: 1px solid var(--nasapunk-edge); outline-offset: 0;
+  box-shadow: inset 0 0 0 1px var(--nasapunk-line), var(--nasapunk-shadow) !important;
+}
+html[data-nasapunk-theme] :is(.markdown-body, [data-nasapunk-md-surface]) {
+  color: var(--nasapunk-ink) !important; background-color: var(--nasapunk-panel) !important;
+  border-radius: 0 !important; box-shadow: none !important;
+}
+html[data-nasapunk-theme] .markdown-body { min-width: 0; }
+html[data-nasapunk-theme] .markdown-body img { background-color: transparent; }
+html[data-nasapunk-theme] [data-nasapunk-md-panel].markdown-body { box-shadow: var(--nasapunk-shadow) !important; }
+.nasapunk-folder-tabs { position: absolute; z-index: 1; top: -38px; left: -1px; width: min(340px, 82%); height: 30px; pointer-events: none; filter: drop-shadow(2px 3px 0 rgba(25,30,27,.2)); }
+.nasapunk-folder-tabs i { position: absolute; top: 0; height: 30px; width: 34%; border: 0; border-radius: 0; clip-path: polygon(0 0, calc(100% - 13px) 0, 100% 13px, 100% 100%, 0 100%); background: var(--nasapunk-edge); }
+.nasapunk-folder-tabs i::after { content: ""; position: absolute; inset: 1px; clip-path: polygon(0 0, calc(100% - 13px) 0, 100% 13px, 100% 100%, 0 100%); background: var(--nasapunk-tab-color); }
+.nasapunk-folder-tabs .nasapunk-tab-red { left: 66%; --nasapunk-tab-color: var(--nasapunk-red); }
+.nasapunk-folder-tabs .nasapunk-tab-ochre { left: 44%; --nasapunk-tab-color: var(--nasapunk-ochre); }
+.nasapunk-folder-tabs .nasapunk-tab-mint { left: 22%; --nasapunk-tab-color: var(--nasapunk-mint); }
+.nasapunk-folder-tabs .nasapunk-tab-cover { left: 0; --nasapunk-tab-color: var(--nasapunk-folder-cover); }
+/* Markdown 面板与页签装饰。 */
+html[data-nasapunk-theme] [data-nasapunk-md-panel]::before { content: none; }
+html[data-nasapunk-theme] [data-nasapunk-md-panel]::after {
+  content: ""; position: absolute; inset: -8px; pointer-events: none;
+  background: radial-gradient(circle at 3px 3px, var(--nasapunk-edge) 0 1.5px, transparent 2px),
+    radial-gradient(circle at calc(100% - 3px) 3px, var(--nasapunk-edge) 0 1.5px, transparent 2px),
+    radial-gradient(circle at 3px calc(100% - 3px), var(--nasapunk-edge) 0 1.5px, transparent 2px),
+    radial-gradient(circle at calc(100% - 3px) calc(100% - 3px), var(--nasapunk-edge) 0 1.5px, transparent 2px);
+}
+html[data-nasapunk-theme] [data-nasapunk-md-panel] > .nasapunk-folder-tabs { left: calc(-1 * clamp(12px, 1.15vw, 18px)); top: calc(-30px - clamp(12px, 1.15vw, 18px)); }
+html[data-nasapunk-theme] .markdown-body [data-nasapunk-md-title] {
+  --nasapunk-font-active: var(--nasapunk-font-label); --nasapunk-md-title-size: 56px;
+  display: flex; align-items: center; gap: clamp(10px, 1.4vw, 22px);
+  width: 100%; min-width: 0; margin: 0 0 24px !important; padding: 0 !important;
+  border: 0 !important; font-size: var(--nasapunk-md-title-size) !important;
+  font-weight: 900 !important; font-style: normal; line-height: 1.12 !important;
+  letter-spacing: -.035em; color: var(--nasapunk-ink); white-space: nowrap;
+}
+html[data-nasapunk-theme] [data-nasapunk-md-title]::before,
+html[data-nasapunk-theme] [data-nasapunk-md-title]::after {
+  content: ""; display: block; height: 1em; min-width: clamp(16px, 3vw, 60px);
+  background: linear-gradient(180deg, var(--nasapunk-mint) 0 33.333%, var(--nasapunk-ochre) 33.333% 66.666%, var(--nasapunk-red) 66.666%);
+}
+html[data-nasapunk-theme] [data-nasapunk-md-title]::before { flex: 0 0 clamp(16px, 3vw, 60px); }
+html[data-nasapunk-theme] [data-nasapunk-md-title]::after { flex: 1 0 clamp(16px, 3vw, 60px); }
+html[data-nasapunk-theme] .nasapunk-md-title-text {
+  --nasapunk-font-active: var(--nasapunk-font-label); display: inline-block; flex: 0 0 auto;
+  font: inherit; -webkit-text-stroke: 0; white-space: nowrap;
+}
+html[data-nasapunk-theme] .nasapunk-md-title-text :is(strong, em, a, code, span) { font: inherit; }
+html[data-nasapunk-theme] .nasapunk-md-title-text br { display: none; }
+html[data-nasapunk-theme] [data-nasapunk-md-encoding] {
+  opacity: 1 !important; z-index: 2 !important; top: 0 !important; right: 0 !important;
+  width: 132px !important; color: var(--nasapunk-ink) !important;
+}
+html[data-nasapunk-theme] .markdown:has(> [data-nasapunk-md-encoding]) > .markdown-body { padding-top: 48px; }
+html[data-nasapunk-theme] [data-nasapunk-md-encoding] .hope-select__trigger {
+  background: var(--nasapunk-recess) !important; color: var(--nasapunk-ink) !important;
+  border: 1px solid var(--nasapunk-edge) !important; font-weight: 700; min-height: 32px;
+}
+html[data-nasapunk-theme] [data-nasapunk-md-encoding] :is(.hope-select__value, .hope-select__icon) { color: var(--nasapunk-ink) !important; opacity: 1 !important; }
+html[data-nasapunk-theme] [data-nasapunk-md-encoding] .hope-select__trigger:focus-visible { outline: 2px solid var(--nasapunk-accent); outline-offset: 2px; }
+html[data-nasapunk-theme] [data-nasapunk-md-encoding-menu] { background: var(--nasapunk-panel) !important; color: var(--nasapunk-ink) !important; opacity: 1 !important; }
+html[data-nasapunk-theme] [data-nasapunk-md-encoding-menu] [role="option"] { color: var(--nasapunk-ink) !important; }
+html[data-nasapunk-theme] [data-nasapunk-md-encoding-menu] [role="option"]:is(:hover, [data-highlighted], [aria-selected="true"]) { background: var(--nasapunk-hover) !important; }
+
+/* 登录页：原始输入框与认证行为保持由 SolidJS 管理 */
+html[data-nasapunk-page="login"] [data-nasapunk-login-shell] {
+  min-height: 100svh !important;
+  height: auto !important;
+  padding: 48px 20px !important;
+}
+html[data-nasapunk-theme] [data-nasapunk-login-background] { background: var(--nasapunk-paper) !important; }
+html[data-nasapunk-theme] [data-nasapunk-login-background] > * { visibility: hidden; }
+html[data-nasapunk-theme] [data-nasapunk-login-card] {
+  position: relative;
+  isolation: isolate;
+  width: min(100%, 420px) !important;
+  padding: 42px 30px 30px !important;
+  color: var(--nasapunk-ink) !important;
+  background: var(--nasapunk-panel) !important;
+  border: 1px solid var(--nasapunk-edge);
+  border-top: 5px solid var(--nasapunk-mint);
+  border-radius: var(--nasapunk-radius) !important;
+  box-shadow: 6px 6px 0 var(--nasapunk-recess), 7px 7px 0 var(--nasapunk-line) !important;
+}
+html[data-nasapunk-theme] [data-nasapunk-login-card]::before {
+  content: "IDENTITY VERIFICATION";
+  position: absolute;
+  top: -13px;
+  left: 20px;
+  padding: 2px 10px;
+  color: var(--nasapunk-ink);
+  background: var(--nasapunk-panel);
+  border: 1px solid var(--nasapunk-edge);
+  font: 700 10px/1.6 var(--nasapunk-font-label);
+  letter-spacing: .16em;
+}
+html[data-nasapunk-theme] [data-nasapunk-login-card]::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 26px;
+  height: 6px;
+  background: repeating-linear-gradient(135deg, var(--nasapunk-ink) 0 3px, var(--nasapunk-panel) 3px 6px);
+  opacity: .65;
+  pointer-events: none;
+}
+html[data-nasapunk-theme] [data-nasapunk-login-card] .hope-heading { color: var(--nasapunk-ink) !important; font-weight: 750; font-size: 24px; }
+html[data-nasapunk-theme] [data-nasapunk-login-card] input { min-height: 44px; }
+html[data-nasapunk-theme] [data-nasapunk-login-action] {
+  background: var(--nasapunk-ink) !important;
+  color: var(--nasapunk-panel) !important;
+  border-color: var(--nasapunk-ink) !important;
+}
+
+/* 启动画面：三条带自底部升起 → 平滑双向实心进度条 */
+#nasapunk-boot {
+  --nasapunk-font-active: var(--nasapunk-font-label);
+  --nasapunk-art-graphite: #303733;
+  /* 这里填写不透明度：对应近 / 中 / 远层的透明度 30% / 55% / 80%。 */
+  --nasapunk-echo-near: .40;
+  --nasapunk-echo-middle: .25;
+  --nasapunk-echo-far: .10;
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  display: grid;
+  place-items: center;
+  background: var(--nasapunk-paper, #ece5d6);
+  color: var(--nasapunk-ink, #2b302e);
+  overflow: hidden;
+  isolation: isolate;
+  /* 正常退场由资源检查点触发，没有按固定时间隐藏的 CSS。 */
+  transition: opacity .48s ease, visibility .48s;
+}
+#nasapunk-boot *, #nasapunk-boot *::before, #nasapunk-boot *::after { box-sizing: border-box; }
+#nasapunk-boot::before {
+  content: "";
+  position: absolute;
+  inset: clamp(16px, 3vw, 44px);
+  border: 1px solid var(--nasapunk-line);
+  pointer-events: none;
+  /* #nasapunk-boot 自成层叠上下文：底色之上、所有文字和控件之下。 */
+  z-index: -1;
+}
+#nasapunk-boot::after {
+  content: "";
+  position: absolute;
+  top: 48px;
+  right: 50px;
+  width: 32px;
+  height: 1px;
+  background: var(--nasapunk-edge);
+  box-shadow: -9px 4px 0 var(--nasapunk-edge), 3px 7px 0 var(--nasapunk-line);
+  opacity: .18;
+  transform: rotate(-9deg);
+  pointer-events: none;
+  z-index: -1;
+}
+/* 细线框之上的装饰字形是内联 SVG 路径，不依赖访客字体或外部文件。
+   主字使用完全不透明的石墨色，残影为高透明度三色实心填充，无描边。
+   SVG viewBox 只包围主字；残影绘制在框外，不参与主字定位。
+   纵向范围：NASAPUNK 为 12.7–37.7vh，CLOUD 为 62.8–87.6vh。
+   宽度随高度按原始字形比例同步缩放，不单独拉伸或压缩任何方向。
+   两组主字分别从左、右屏幕边缘超出 4vw，保留装饰文字的裁切构图。 */
+.nasapunk-boot-art {
+  position: absolute;
+  z-index: 0;
+  width: auto;
+  aspect-ratio: var(--nasapunk-art-ratio);
+  visibility: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+.nasapunk-boot-art--nasapunk-wordmark { left: -4vw; top: 12.7vh; height: 25vh; }
+.nasapunk-boot-art--cloud { right: -4vw; top: 62.8vh; height: 24.8vh; }
+.nasapunk-boot-art svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.nasapunk-art-echo {
+  fill: var(--nasapunk-echo-color);
+  stroke: none;
+  opacity: var(--nasapunk-echo-opacity);
+  visibility: hidden;
+}
+/* 仪表实际入场完成后，标题复用相同的淡入上移动画；随后残影逐层展开。 */
+#nasapunk-boot[data-art-ready] .nasapunk-boot-art { visibility: visible; animation: nasapunk-instrument .32s both; }
+#nasapunk-boot[data-art-ready] .nasapunk-art-echo { animation: nasapunk-echo-spread .2s var(--nasapunk-echo-delay) cubic-bezier(.2,.8,.2,1) both; }
+.nasapunk-art-front-base { fill: var(--nasapunk-paper); }
+.nasapunk-art-front-ink { fill: var(--nasapunk-art-graphite); }
+@keyframes nasapunk-echo-spread {
+  0% { visibility: hidden; transform: translateX(0); }
+  1% { visibility: visible; }
+  100% { visibility: visible; transform: translateX(var(--nasapunk-echo-offset)); }
+}
+.nasapunk-boot-stripes {
+  position: absolute;
+  z-index: 1;
+  inset: 0 auto 0 50%;
+  display: flex;
+  width: clamp(78px, 13vw, 162px);
+  transform: translateX(-50%);
+}
+.nasapunk-boot-stripes i { flex: 1; height: 100%; transform: translateY(100%); animation: nasapunk-rise .95s cubic-bezier(.22,.75,.2,1) both; }
+.nasapunk-boot-stripes i:nth-child(1) { background: var(--nasapunk-mint); }
+.nasapunk-boot-stripes i:nth-child(2) { background: var(--nasapunk-ochre); animation-delay: .06s; }
+.nasapunk-boot-stripes i:nth-child(3) { background: var(--nasapunk-red); animation-delay: .12s; }
+.nasapunk-boot-instrument {
+  position: relative;
+  z-index: 3;
+  width: min(680px, calc(100vw - 48px));
+  padding: 32px clamp(16px, 3vw, 32px) 30px;
+  background: var(--nasapunk-paper);
+  border: 1px solid var(--nasapunk-edge);
+  box-shadow: 4px 4px 0 rgba(28, 33, 27, .16);
+  animation: nasapunk-instrument .32s 1.08s both;
+}
+.nasapunk-boot-legend {
+  position: absolute;
+  left: 18px;
+  top: -10px;
+  padding: 0 8px;
+  background: var(--nasapunk-paper);
+  font-size: 11px;
+  line-height: 18px;
+  font-weight: 900;
+  letter-spacing: .22em;
+}
+.nasapunk-boot-track { position: relative; height: 24px; background: var(--nasapunk-recess); }
+/* 进度条边框独立绘制，填充和反色文字共用坐标。 */
+.nasapunk-boot-track::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--nasapunk-edge);
+  pointer-events: none;
+}
+.nasapunk-boot-fill { position: absolute; inset: 3px; display: flex; }
+.nasapunk-boot-half { width: 50%; height: 100%; background: var(--nasapunk-ink); transform: scaleX(var(--nasapunk-progress, 0)); transform-origin: left; }
+.nasapunk-boot-half:last-child { transform-origin: right; }
+.nasapunk-boot-percent {
+  /* 三层相同文字：原色一层、左右实心填充对应的反色各一层。 */
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  color: var(--nasapunk-ink);
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .08em;
+  text-align: center;
+  pointer-events: none;
+}
+.nasapunk-boot-percent--left, .nasapunk-boot-percent--right { color: var(--nasapunk-paper); }
+.nasapunk-boot-percent--left { clip-path: inset(3px calc(100% - var(--nasapunk-fill-edge, 3px)) 3px 3px); }
+.nasapunk-boot-percent--right { clip-path: inset(3px 3px 3px calc(100% - var(--nasapunk-fill-edge, 3px))); }
+#nasapunk-boot[data-state="leaving"] { opacity: 0; visibility: hidden; pointer-events: none; }
+#nasapunk-boot[data-state="leaving"] .nasapunk-boot-stripes { transform: translate(-50%, -5vh); transition: transform .48s ease; }
+@keyframes nasapunk-rise { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes nasapunk-instrument { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* 局部加载为非定量扫描条：单块左右往复，不模拟两端合拢或完成百分比。 */
+html[data-nasapunk-theme] [data-nasapunk-local-loading] {
+  position: relative;
+  min-width: min(260px, 65vw);
+  min-height: 96px;
+}
+html[data-nasapunk-theme] [data-nasapunk-local-loading] > .hope-spinner { opacity: 0; }
+html[data-nasapunk-theme] [data-nasapunk-local-loading]::before {
+  content: "LOADING";
+  position: absolute;
+  left: 50%;
+  top: calc(50% - 20px);
+  transform: translateX(-50%);
+  padding: 0 6px;
+  font: 800 10px/1.4 var(--nasapunk-font-label);
+  letter-spacing: .18em;
+  color: var(--nasapunk-muted);
+}
+html[data-nasapunk-theme] [data-nasapunk-local-loading]::after {
+  content: "";
+  position: absolute;
+  top: calc(50% + 2px);
+  left: 50%;
+  width: min(320px, 65vw);
+  height: 14px;
+  border: 1px solid var(--nasapunk-edge);
+  outline: 3px solid var(--nasapunk-panel);
+  transform: translateX(-50%);
+  background-color: var(--nasapunk-recess);
+  background-image: linear-gradient(var(--nasapunk-ink), var(--nasapunk-ink));
+  background-size: 24% 6px;
+  background-position: 0% center;
+  background-repeat: no-repeat;
+  animation: nasapunk-local-progress 1.7s ease-in-out infinite alternate;
+}
+@keyframes nasapunk-local-progress { from { background-position: 0% center; } to { background-position: 100% center; } }
+
+/* 页脚：独立背景、115% 三色条、时钟信息 */
+#nasapunk-footer-region { box-sizing: border-box; width: 100%; padding: 28px 0 52px; background-color: var(--nasapunk-footer-color, var(--nasapunk-paper)); background-image: var(--nasapunk-footer-image, none); background-size: var(--nasapunk-footer-image-size, cover); background-position: var(--nasapunk-footer-image-position, center); background-repeat: no-repeat; }
+#nasapunk-footer { box-sizing: border-box; position: relative; margin: 0 auto; width: var(--nasapunk-footer-width, calc(100% - 40px)); color: var(--nasapunk-muted); }
+.nasapunk-footer-brand-row {
+  --nasapunk-footer-symbol-y: -6px; /* 图形 Logo 上下微调：正值向下，负值向上。 */
+  --nasapunk-footer-symbol-scale: 1; /* 按可见图形匹配字标＋色带高度后，再整体缩放。 */
+  position: relative; display: flex; align-items: flex-end; justify-content: space-between; }
+.nasapunk-footer-brand { position: relative; z-index: 1; flex: 0 1 529px; min-width: 0; max-width: 80%; }
+.nasapunk-footer-logo { display: block; width: 86.95652174%; height: auto; margin-bottom: 10px; color: var(--nasapunk-ink); }
+.nasapunk-footer-rule { display: flex; width: 100%; height: 12px; }
+.nasapunk-footer-rule i { flex: 1; background: var(--nasapunk-mint); }
+.nasapunk-footer-rule i:nth-child(2) { background: var(--nasapunk-ochre); }
+.nasapunk-footer-rule i:nth-child(3) { background: var(--nasapunk-red); }
+.nasapunk-footer-divider { position: absolute; inset: auto 0 0; border-bottom: 1px solid var(--nasapunk-line); pointer-events: none; }
+.nasapunk-footer-symbol {
+  position: absolute; right: 0; top: 50%; display: block;
+  width: calc(var(--nasapunk-footer-symbol-measured, 136px) * var(--nasapunk-footer-symbol-scale));
+  height: calc(var(--nasapunk-footer-symbol-measured, 136px) * var(--nasapunk-footer-symbol-scale));
+  object-fit: contain; margin: 0;
+  transform: translateY(calc(-50% + var(--nasapunk-footer-symbol-y)));
+}
+/* Logo 链接继承 header-left 的高度。 */
+.nasapunk-header-home { display: inline-flex; align-items: center; height: 100%; max-height: 100%; flex: 0 0 auto; color: inherit; text-decoration: none; }
+.nasapunk-header-home img { display: block; height: 100% !important; width: auto !important; max-height: 100%; object-fit: contain; }
+.nasapunk-footer-row { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 20px 28px; padding-top: 32px; }
+.nasapunk-footer-links { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; }
+#nasapunk-footer a { color: inherit; text-decoration: none; }
+#nasapunk-footer a:is(:hover, :focus-visible) { background: transparent; }
+/* 划线只作用于文字 span；外侧角框仍包围整个链接。 */
+#nasapunk-footer .nasapunk-footer-link-text {
+  display: inline-block; background-image: linear-gradient(var(--nasapunk-accent), var(--nasapunk-accent));
+  background-repeat: no-repeat; background-position: 0 calc(100% - 4px); background-size: 0 2px;
+  transition: background-size 360ms cubic-bezier(.55,0,.85,.45);
+}
+#nasapunk-footer a:is(:hover, :focus-visible) .nasapunk-footer-link-text { background-size: 100% 2px; }
+.nasapunk-footer-links a { display: inline-flex; align-items: center; gap: 8px; padding: 2px 6px; font-size: 14px; line-height: 1.9; }
+.nasapunk-footer-links svg { width: 14px; height: 14px; flex-shrink: 0; }
+.nasapunk-footer-meta { margin-left: auto; text-align: right; }
+.nasapunk-footer-copy { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: baseline; gap: 4px 24px; margin: 0; font-size: 14px; line-height: 1.9; }
+.nasapunk-footer-copy a { display: inline-block; padding: 2px 6px; }
+.nasapunk-footer-uptime { margin: 6px 0 0; padding-right: 0; font-size: 13px; line-height: 1.8; font-variant-numeric: tabular-nums; }
+html[data-nasapunk-page="manage"] #nasapunk-footer-region { display: none; }
+@media (max-width: 600px) {
+  html[data-nasapunk-theme] .hope-breadcrumb { padding: 8px; }
+  html[data-nasapunk-theme] [data-nasapunk-login-card] { padding: 34px 22px 22px !important; }
+  #nasapunk-footer { width: var(--nasapunk-footer-width, calc(100% - 32px)); }
+  .nasapunk-footer-brand { flex-basis: 368px; max-width: 90%; }
+  .nasapunk-footer-meta { margin-left: 0; text-align: left; }
+  .nasapunk-footer-links a { font-size: 14px; }
+  .nasapunk-footer-links svg { width: 14px; height: 14px; }
+  .nasapunk-footer-copy { margin-left: 0; justify-content: flex-start; text-align: left; }
+  .nasapunk-footer-row { align-items: flex-start; flex-direction: column; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #nasapunk-boot[data-art-ready] .nasapunk-boot-art { animation: none; transform: none; }
+  #nasapunk-boot[data-art-ready] .nasapunk-art-echo { visibility: visible; animation: none; transform: translateX(var(--nasapunk-echo-offset)); }
+  .nasapunk-boot-stripes i, .nasapunk-boot-instrument { animation: none; transform: none; opacity: 1; }
+  #nasapunk-boot, #nasapunk-boot[data-state="leaving"] .nasapunk-boot-stripes { transition: none; }
+  html[data-nasapunk-theme] [data-nasapunk-local-loading]::after { animation: none; background-size: 40% 6px; }
+  html[data-nasapunk-theme] :is(.hope-button, .hope-icon-button, .list-item, .grid-item) { transition: none !important; }
+}
+
+.footer {
+    display: none !important;
+}
+
+/* 交互控件使用 OpenList 主颜色；文字拖选样式由 ::selection 单独处理。 */
+html[data-nasapunk-theme] :is(.hope-input, .hope-textarea, input, textarea, select):focus-visible:not([aria-invalid="true"]) {
+  border-color: var(--nasapunk-line) !important; box-shadow: inset 0 -2px 0 var(--nasapunk-accent) !important;
+}
+html[data-nasapunk-theme] :is(.hope-select__trigger, .hope-menu__item, .hope-select__option):is(:focus-visible, [data-focus], [data-highlighted], [aria-selected="true"]) {
+  outline: none !important; box-shadow: inset 0 -2px 0 var(--nasapunk-accent) !important;
+}
+html[data-nasapunk-theme] .hope-icon-button:not(.header *, .left-toolbar-box *):is(:hover, :focus-visible) {
+  outline: none !important; box-shadow: inset 0 -2px 0 var(--nasapunk-accent) !important; background-color: var(--nasapunk-selected) !important;
+}
+html[data-nasapunk-theme] .left-toolbar :is(button, .hope-button, .hope-icon-button) {
+  color: var(--nasapunk-accent) !important; background-color: var(--nasapunk-recess) !important;
+}
+html[data-nasapunk-theme] :is(.hope-drawer__content, [data-nasapunk-sidebar], .left-toolbar) :is(button, .hope-button, .hope-icon-button):is(:hover, :focus-visible) { background-color: var(--nasapunk-selected) !important; }
+html[data-nasapunk-theme] .left-toolbar button svg { color: var(--nasapunk-accent) !important; }
+/* 设置表单使用正文色，主颜色用于交互提示。 */
+html[data-nasapunk-theme] :is(.hope-drawer__content, [data-nasapunk-sidebar]) :is(button, .hope-button, .hope-icon-button, .hope-select__trigger, input, select, textarea) {
+  color: var(--nasapunk-ink) !important; background-color: var(--nasapunk-recess) !important;
+}
+html[data-nasapunk-theme] :is(.hope-drawer__content, [data-nasapunk-sidebar]) :is(button, .hope-select__trigger) :is(span, svg) { color: var(--nasapunk-ink) !important; }
+html[data-nasapunk-theme] :is(.hope-modal__header, .hope-drawer__header, .hope-popover__header)::before {
+  content: ""; position: absolute; inset: 0 auto 0 0; width: 4px;
+  background: linear-gradient(180deg, var(--nasapunk-mint) 0 33.333%, var(--nasapunk-ochre) 33.333% 66.666%, var(--nasapunk-red) 66.666%); pointer-events: none;
+}
+html[data-nasapunk-theme] .hope-drawer__header, html[data-nasapunk-theme] .hope-drawer__header * { font-weight: 800 !important; color: var(--nasapunk-ink) !important; }
+html[data-nasapunk-theme] .hope-breadcrumb::after {
+  content: ""; position: absolute; inset: 0 0 0 auto; width: clamp(72px, 20vw, 300px); border-left: 1px solid var(--nasapunk-line); pointer-events: none;
+  background: linear-gradient(90deg, var(--nasapunk-mint) 0 33.333%, var(--nasapunk-ochre) 33.333% 66.666%, var(--nasapunk-red) 66.666%);
+}
+/* 竖带位于内容底层；折面挂在导航内部，盖过导航外侧阴影。 */
+html[data-nasapunk-theme] #root[data-nasapunk-ribbon-root] { isolation: isolate; }
+#nasapunk-page-ribbon { position: absolute; inset: 0 auto auto 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; pointer-events: none; }
+#nasapunk-page-ribbon-fold { position: absolute; left: 0; top: 100%; width: 100%; z-index: 1; overflow: hidden; pointer-events: none; filter: brightness(.85); }
+:is(#nasapunk-page-ribbon, #nasapunk-page-ribbon-fold) [data-band="0"] { fill: var(--nasapunk-mint); }
+:is(#nasapunk-page-ribbon, #nasapunk-page-ribbon-fold) [data-band="1"] { fill: var(--nasapunk-ochre); }
+:is(#nasapunk-page-ribbon, #nasapunk-page-ribbon-fold) [data-band="2"] { fill: var(--nasapunk-red); }
+/* 登录页与预载页共用三色条带和细线框。 */
+#nasapunk-login-decor { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+#nasapunk-login-decor::before { content: ""; position: absolute; inset: clamp(16px, 3vw, 44px); border: 1px solid var(--nasapunk-line); }
+.nasapunk-login-stripes { position: absolute; inset: 0 auto 0 50%; display: flex; width: clamp(78px, 13vw, 162px); transform: translateX(-50%); }
+.nasapunk-login-stripes i { flex: 1; background: var(--nasapunk-mint); }
+.nasapunk-login-stripes i:nth-child(2) { background: var(--nasapunk-ochre); }
+.nasapunk-login-stripes i:nth-child(3) { background: var(--nasapunk-red); }
+html[data-nasapunk-page="login"] [data-nasapunk-login-shell] { position: relative; z-index: 1; background: transparent !important; }
+html[data-nasapunk-page="login"] [data-nasapunk-login-background] { display: none !important; }
+html[data-nasapunk-page="login"] #nasapunk-footer-region { position: relative; z-index: 1; }
+@media (max-width: 600px) {
+  html[data-nasapunk-theme] .hope-breadcrumb { padding-right: calc(clamp(72px, 20vw, 300px) + 12px); }
+  #nasapunk-footer-region { padding-bottom: 40px; }
+}
+
+/* 标题栏定位后会盖过在它之前渲染的关闭按钮，显式抬高原生按钮层级。 */
+html[data-nasapunk-theme] :is(.hope-close-button, .hope-modal__close-button, .hope-drawer__close-button, .hope-notification__close-button) {
+  z-index: 2 !important; pointer-events: auto !important;
+}
+/* 顶栏和工具栏的悬停反馈使用角线框。 */
+html[data-nasapunk-theme] :is(.header, .left-toolbar-box) :is(button, [role="button"], svg.hope-icon):is(:hover, :focus-visible, [data-nasapunk-ready]) {
+  background-color: transparent !important; border-color: transparent !important;
+  box-shadow: none !important; outline: none !important;
+}
+.nasapunk-ready-outline {
+  position: fixed; z-index: 2147482000; pointer-events: none; color: var(--nasapunk-accent);
+  box-sizing: border-box; opacity: 0; transform: scale(.92);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+.nasapunk-ready-outline[data-visible] { opacity: 1; transform: scale(1); }
+.nasapunk-ready-corner {
+  position: absolute; box-sizing: border-box; width: 8px; height: 8px;
+  border: 0 solid currentColor;
+  transition: width 600ms cubic-bezier(.4,0,.2,1), height 600ms cubic-bezier(.4,0,.2,1);
+}
+.nasapunk-ready-corner:nth-child(1) { left: 0; top: 0; border-left-width: 1px; border-top-width: 1px; }
+.nasapunk-ready-corner:nth-child(2) { right: 0; top: 0; border-right-width: 1px; border-top-width: 1px; }
+.nasapunk-ready-corner:nth-child(3) { right: 0; bottom: 0; border-right-width: 1px; border-bottom-width: 1px; }
+.nasapunk-ready-corner:nth-child(4) { left: 0; bottom: 0; border-left-width: 1px; border-bottom-width: 1px; }
+.nasapunk-ready-outline[data-joined] .nasapunk-ready-corner { width: 50%; height: 50%; }
+.nasapunk-ready-caption {
+  position: absolute; left: calc(100% + 4px); top: 50%; transform: translateY(-50%);
+  font: 900 8px/1 var(--nasapunk-font-label); letter-spacing: .06em;
+  writing-mode: vertical-rl; white-space: nowrap; opacity: 0;
+}
+.nasapunk-ready-outline[data-ready] .nasapunk-ready-caption { animation: nasapunk-ready-flicker 320ms steps(1, end) both; }
+@keyframes nasapunk-ready-flicker {
+  0%, 26%, 56% { opacity: 0; }
+  10%, 40%, 76%, 100% { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nasapunk-ready-outline, .nasapunk-ready-corner { transition: none; }
+  .nasapunk-ready-outline[data-ready] .nasapunk-ready-caption { animation: none; opacity: 1; }
+}
+/* 装饰网格：5 列 × 3 行，十字两轴等长；不进入交互层。 */
+.nasapunk-cross-grid {
+  position: absolute; inset: clamp(16px, 3vw, 44px); display: grid;
+  grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(3, 1fr);
+  place-items: center; color: var(--nasapunk-line); pointer-events: none;
+}
+.nasapunk-cross-grid i { position: relative; display: block; width: clamp(16px, 1.6vw, 26px); aspect-ratio: 1; }
+.nasapunk-cross-grid i::before, .nasapunk-cross-grid i::after { content: ""; position: absolute; background: currentColor; }
+.nasapunk-cross-grid i::before { width: 100%; height: 1px; left: 0; top: calc(50% - .5px); }
+.nasapunk-cross-grid i::after { height: 100%; width: 1px; top: 0; left: calc(50% - .5px); }
+#nasapunk-boot > .nasapunk-cross-grid { z-index: -1; }
+#nasapunk-login-decor::before, #nasapunk-login-decor > .nasapunk-cross-grid { z-index: 1; }
+#nasapunk-login-decor::after {
+  content: "AUTHENTICATION"; position: absolute;
+  left: calc(var(--nasapunk-login-card-left, 35.5vw) - 14vh); top: 86.3vh; z-index: 0;
+  transform-origin: 0 0; transform: rotate(-90deg);
+  font-family: var(--nasapunk-font-label);
+  font-size: 23.5vh; font-weight: 900; font-style: normal;
+  line-height: 1; letter-spacing: -.055em; white-space: nowrap; color: var(--nasapunk-ink);
+  pointer-events: none; user-select: none;
+}
+.nasapunk-login-stripes { z-index: 2; }
+
+/* 统一各区域左缘装饰：三条横向并排的竖色带。 */
+html[data-nasapunk-theme] :is(.hope-breadcrumb, .hope-modal__header, .hope-drawer__header, .hope-popover__header, [data-nasapunk-sidebar])::before {
+  width: 12px; inset: 0 auto 0 0; height: auto;
+  background: linear-gradient(90deg, var(--nasapunk-mint) 0 33.333%, var(--nasapunk-ochre) 33.333% 66.666%, var(--nasapunk-red) 66.666%);
+}
+html[data-nasapunk-theme] .hope-breadcrumb { padding-left: 24px; }
+html[data-nasapunk-theme] :is(.left-toolbar-box svg.hope-icon, .left-toolbar-box svg.hope-icon:hover, .left-toolbar-box svg.hope-icon:focus-visible) {
+  color: var(--nasapunk-accent) !important;
+}
+/* 原生 tooltip 继续显示；装饰框不拦截任何指针事件。 */
+html[data-nasapunk-theme] #nasapunk-user-button {
+  display: inline-grid; place-items: center; width: 36px; height: 36px; padding: 7px;
+  flex: 0 0 auto; color: var(--nasapunk-accent); cursor: pointer;
+  border: 0; background: transparent; box-shadow: none;
+}
+/* 顶栏三个控件之间使用 16px 间距。 */
+.header-right:has(#nasapunk-user-button) { gap: 16px !important; }
+.header-right:has(#nasapunk-user-button) > * { margin-left: 0 !important; margin-right: 0 !important; }
+.nasapunk-user-icon { display: block; width: 22px; height: 22px; }
+.nasapunk-user-icon svg { display: block; width: 100%; height: 100%; }
+.nasapunk-user-icon[data-cdn-ready] { background: currentColor; mask: var(--nasapunk-user-icon-url) center / contain no-repeat; }
+.nasapunk-user-icon[data-cdn-ready] svg { visibility: hidden; }
+:is(#nasapunk-account-menu, .nasapunk-account-menu-retiring) {
+  position: fixed; z-index: 2147481000; min-width: 180px; max-width: calc(100vw - 24px);
+  padding: 4px; background: var(--nasapunk-panel); color: var(--nasapunk-ink);
+  transform-origin: top right;
+  border: 1px solid var(--nasapunk-edge); border-radius: var(--nasapunk-radius); box-shadow: var(--nasapunk-shadow);
+}
+.nasapunk-account-name { padding: 8px 10px; margin-bottom: 3px; border-bottom: 1px solid var(--nasapunk-line); font-size: 16px; font-weight: 750; overflow-wrap: anywhere; }
+:is(#nasapunk-account-menu, .nasapunk-account-menu-retiring) button {
+  display: flex; align-items: center; gap: 9px; width: 100%; padding: 8px 10px;
+  font-size: 16px; line-height: 1.4; color: var(--nasapunk-ink); background: transparent;
+  border: 0; border-radius: 0; box-shadow: none; cursor: pointer; text-align: left;
+}
+:is(#nasapunk-account-menu, .nasapunk-account-menu-retiring) button:is(:hover, :focus-visible) { background: var(--nasapunk-selected); }
+:is(#nasapunk-account-menu, .nasapunk-account-menu-retiring) svg { width: 20px; height: 20px; flex: none; }
+@media (prefers-reduced-motion: reduce) { #nasapunk-footer .nasapunk-footer-link-text { transition: none !important; } }
+
+/* 页面衔接与日月切换：原生 CSS + SVG，无外部依赖 */
+html[data-nasapunk-route="leaving"] [data-nasapunk-route-surface] {
+  opacity: .12; transform: translateY(-6px);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+html[data-nasapunk-route="entering"] [data-nasapunk-route-surface] {
+  opacity: 1; transform: translateY(0);
+  transition: opacity 340ms ease, transform 340ms cubic-bezier(.2,.7,.2,1);
+}
+#nasapunk-theme-scene {
+  position: fixed; inset: 0; z-index: 2147483646; width: 100%; height: 100%;
+  overflow: hidden; pointer-events: auto; touch-action: none; user-select: none;
+}
+#nasapunk-theme-scene > svg { display: block; width: 100%; height: 100%; }
+#nasapunk-theme-toggle[aria-busy="true"] { cursor: wait; }
+/* 同源整页跳转由支持 View Transition 的浏览器衔接，SPA 使用上面的内容动画。 */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: nasapunk-page-out 180ms ease both; }
+::view-transition-new(root) { animation: nasapunk-page-in 340ms ease both; }
+@keyframes nasapunk-page-out { to { opacity: 0; transform: translateY(-6px); } }
+@keyframes nasapunk-page-in { from { opacity: 0; transform: translateY(6px); } }
+@media (prefers-reduced-motion: reduce) {
+  html[data-nasapunk-route] [data-nasapunk-route-surface] { opacity: 1; transform: none; transition: none; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+}
+
+/* 两层结构：外层文件夹的高顶部收纳区域标题；内层设备压住标题底部 25%。 */
+html[data-nasapunk-theme] [data-nasapunk-md-panel] {
+  --nasapunk-md-region-size: clamp(30px, 6vw, 104px);
+  --nasapunk-md-folder-inset: clamp(10px, 1.6vw, 24px);
+  --nasapunk-md-folder-top: clamp(24px, 2.5vw, 40px);
+  display: block !important; position: relative; isolation: isolate;
+  margin-top: 56px !important;
+  padding: calc(var(--nasapunk-md-folder-top) + var(--nasapunk-md-region-size) * .75) var(--nasapunk-md-folder-inset) var(--nasapunk-md-folder-inset) !important;
+  background: var(--nasapunk-folder-cover) !important; border: 1px solid var(--nasapunk-edge) !important;
+  outline: none; border-radius: 0 3px 3px 3px !important; box-shadow: var(--nasapunk-shadow) !important;
+}
+/* 标题底板单独勾边；顶部原色封套厚度与左右内缩相同，底边接入膝板。 */
+html[data-nasapunk-theme] [data-nasapunk-md-panel]::before {
+  content: ""; position: absolute; z-index: 0; box-sizing: border-box;
+  top: var(--nasapunk-md-folder-inset); left: var(--nasapunk-md-folder-inset); right: var(--nasapunk-md-folder-inset);
+  height: calc(var(--nasapunk-md-folder-top) + var(--nasapunk-md-region-size) * .75 - var(--nasapunk-md-folder-inset) + 2px);
+  background: var(--nasapunk-panel); border: 1px solid var(--nasapunk-edge); border-radius: 2px 2px 0 0;
+  pointer-events: none;
+}
+html[data-nasapunk-theme] [data-nasapunk-md-panel]::after { content: none; }
+html[data-nasapunk-theme] [data-nasapunk-md-panel] > .nasapunk-folder-tabs {
+  left: -1px; top: -30px; height: 30px; z-index: 2; filter: none;
+}
+/* 覆盖页签下边的细线，使封面页签与同色文件夹连成一体。 */
+html[data-nasapunk-theme] [data-nasapunk-md-panel] > .nasapunk-folder-tabs .nasapunk-tab-cover::after { bottom: -1px; }
+html[data-nasapunk-theme] [data-nasapunk-md-panel] > .nasapunk-md-region-heading {
+  --nasapunk-font-active: var(--nasapunk-font-label);
+  position: absolute; z-index: 0; top: var(--nasapunk-md-folder-top);
+  left: calc(var(--nasapunk-md-folder-inset) + clamp(12px, 2.6vw, 42px));
+  height: var(--nasapunk-md-region-size); margin: 0; padding: 0;
+  font: 900 var(--nasapunk-md-region-size)/1 var(--nasapunk-font-label); letter-spacing: -.055em;
+  -webkit-text-stroke: 0; color: var(--nasapunk-ink); white-space: nowrap; pointer-events: none;
+}
+html[data-nasapunk-theme] [data-nasapunk-md-device] {
+  --nasapunk-device-bezel: #a8b09e;
+  --nasapunk-md-controls-height: 50px;
+  --nasapunk-md-encoding-width: 132px;
+  position: relative !important; z-index: 1; box-sizing: border-box; width: 100%;
+  margin: 0 !important; padding: var(--nasapunk-md-controls-height) clamp(12px, 1.4vw, 22px) 34px !important;
+  border: 2px solid var(--nasapunk-edge) !important; border-radius: 4px !important;
+  background: var(--nasapunk-device-bezel) !important;
+  box-shadow: inset 0 0 0 5px var(--nasapunk-recess), 0 4px 0 color-mix(in srgb, var(--nasapunk-edge) 45%, transparent) !important;
+}
+html[data-nasapunk-mode="dark"] [data-nasapunk-md-device] { --nasapunk-device-bezel: #394438; }
+html[data-nasapunk-theme] [data-nasapunk-md-device] > .markdown-body {
+  box-sizing: border-box; position: relative; min-width: 0;
+  padding: clamp(14px, 1.6vw, 26px) !important;
+  border: 1px solid var(--nasapunk-edge); background: var(--nasapunk-panel) !important;
+  box-shadow: inset 0 2px 0 color-mix(in srgb, var(--nasapunk-edge) 15%, transparent) !important;
+}
+html[data-nasapunk-theme] [data-nasapunk-md-device]::before {
+  content: ""; position: absolute; inset: 7px; pointer-events: none;
+  background: radial-gradient(circle at 2px 2px, var(--nasapunk-edge) 0 2px, transparent 2.5px),
+    radial-gradient(circle at calc(100% - 2px) 2px, var(--nasapunk-edge) 0 2px, transparent 2.5px),
+    radial-gradient(circle at 2px calc(100% - 2px), var(--nasapunk-edge) 0 2px, transparent 2.5px),
+    radial-gradient(circle at calc(100% - 2px) calc(100% - 2px), var(--nasapunk-edge) 0 2px, transparent 2.5px);
+}
+html[data-nasapunk-theme] [data-nasapunk-md-device]::after {
+  content: "KNEEBOARD  /  READ ONLY"; position: absolute; bottom: 11px; left: 24px; right: 24px;
+  height: 10px; font: 700 8px/10px var(--nasapunk-font-label); letter-spacing: .15em;
+  color: var(--nasapunk-ink); pointer-events: none;
+  background: repeating-linear-gradient(90deg, var(--nasapunk-edge) 0 1px, transparent 1px 7px) right center / 72px 5px no-repeat;
+}
+.nasapunk-md-device-hardware {
+  --nasapunk-font-active: var(--nasapunk-font-label); position: absolute; top: 17px; left: 32px; right: calc(var(--nasapunk-md-encoding-width) + 38px);
+  display: flex; align-items: center; gap: 12px; height: 16px; pointer-events: none;
+  color: var(--nasapunk-ink); font-size: 9px; font-weight: 800; letter-spacing: .12em; white-space: nowrap;
+}
+.nasapunk-md-status { display: flex; gap: 4px; }
+.nasapunk-md-status, .nasapunk-md-equipment-label { transform: translateY(10px); }
+.nasapunk-md-status i { width: 6px; height: 6px; background: var(--nasapunk-mint); border: 1px solid var(--nasapunk-edge); }
+.nasapunk-md-status i:nth-child(2) { background: var(--nasapunk-ochre); }
+.nasapunk-md-status i:nth-child(3) { background: var(--nasapunk-recess); }
+.nasapunk-md-hardware-keys { margin-left: auto; display: flex; gap: 5px; }
+.nasapunk-md-hardware-keys i { width: 18px; height: 7px; border: 1px solid var(--nasapunk-edge); box-shadow: 0 2px 0 var(--nasapunk-edge); background: var(--nasapunk-recess); }
+html[data-nasapunk-theme] [data-nasapunk-md-device] > [data-nasapunk-md-encoding] {
+  top: calc(var(--nasapunk-md-controls-height) / 2) !important; right: 22px !important;
+  width: var(--nasapunk-md-encoding-width) !important; transform: translateY(-50%);
+}
+
+@media (max-width: 600px) {
+  .nasapunk-md-equipment-label, .nasapunk-md-hardware-keys { display: none; }
+  html[data-nasapunk-theme] [data-nasapunk-md-device]::after { font-size: 7px; letter-spacing: .06em; background-size: 35px 5px; }
+}
+/* 底栏与最后一张内容卡片保持间距，兼容没有 Markdown 的文件页。 */
+html[data-nasapunk-theme][data-nasapunk-page="home"] #nasapunk-footer-region { margin-top: var(--nasapunk-content-footer-gap, 0px); }
+
+/* 原生公告与操作提示：共享外壳与展示时间 */
+html[data-nasapunk-theme] .hope-notification__list {
+  top: var(--nasapunk-notice-top, 116px) !important; bottom: auto !important;
+  right: 20px !important; left: auto !important;
+  width: min(380px, calc(100vw - 40px)) !important; max-width: none !important;
+  gap: 48px !important; overflow: visible !important; pointer-events: none;
+  z-index: 2147482000 !important;
+}
+html[data-nasapunk-theme] .hope-notification__list > :not([data-nasapunk-notice-state]),
+html[data-nasapunk-theme] [data-nasapunk-notice-state="waiting"] { visibility: hidden !important; }
+html[data-nasapunk-theme] [data-nasapunk-notice] {
+  --nasapunk-font-active: var(--nasapunk-font-popup);
+  --nasapunk-ink: #2b302e; --nasapunk-muted: #63675e; --nasapunk-panel: #f4efdf;
+  --nasapunk-line: #a4a598; --nasapunk-edge: #4b514a;
+  position: relative !important; box-sizing: border-box !important;
+  width: 100% !important; min-width: 0 !important; margin: 0 !important;
+  padding: 32px 38px 24px 50px !important;
+  border: 1px solid var(--nasapunk-line) !important; border-radius: var(--nasapunk-radius) !important;
+  background: linear-gradient(to right, var(--nasapunk-mint) 0 4px, var(--nasapunk-ochre) 4px 8px, var(--nasapunk-red) 8px 12px, transparent 12px), var(--nasapunk-panel) !important;
+  color: var(--nasapunk-ink) !important; box-shadow: 3px 3px 0 #b6b5a6 !important;
+  backdrop-filter: none !important; overflow: visible !important;
+  pointer-events: auto; opacity: 0 !important; transform: translateX(calc(100% + 28px)) !important;
+  transition: transform 300ms cubic-bezier(.2,.7,.2,1), opacity 300ms ease !important;
+  align-items: center !important; justify-content: center !important;
+}
+html[data-nasapunk-theme] [data-nasapunk-notice-state="visible"] {
+  opacity: 1 !important; transform: translateX(0) !important;
+}
+html[data-nasapunk-theme] [data-nasapunk-notice]::before {
+  content: attr(data-nasapunk-notice); position: absolute; left: 28px; top: 0;
+  font: italic 900 clamp(23px, 2.1vw, 30px)/1 var(--nasapunk-font-label);
+  letter-spacing: -.04em; -webkit-text-stroke: 0;
+  color: #2b302e; white-space: nowrap; pointer-events: none;
+  opacity: 0; transform: translate(18px, -40%);
+  transition: transform 300ms cubic-bezier(.2,.7,.2,1), opacity 300ms ease;
+}
+html[data-nasapunk-theme] [data-nasapunk-notice-state="visible"]::before { opacity: 1; transform: translate(0, -40%); }
+html[data-nasapunk-theme] [data-nasapunk-notice]::after {
+  content: ""; position: absolute; height: 3px; left: 12px; right: 0; bottom: 0;
+  background: var(--nasapunk-accent); transform-origin: left center; pointer-events: none;
+}
+html[data-nasapunk-theme] [data-nasapunk-notice-clock]::after { animation: nasapunk-notice-remaining 5s linear forwards; }
+@keyframes nasapunk-notice-remaining { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+html[data-nasapunk-theme] [data-nasapunk-notice][class*="-exit"] {
+  opacity: 0 !important; transform: translateX(calc(100% + 28px)) !important;
+  transition-duration: 260ms !important; pointer-events: none;
+}
+html[data-nasapunk-theme] [data-nasapunk-notice][class*="-exit"]::before {
+  opacity: 0; transform: translate(18px, -40%); transition-duration: 260ms;
+}
+/* 公告的 render 外壳没有 .hope-notification 类；内层面板使用透明背景。 */
+html[data-nasapunk-theme] [data-nasapunk-notice="ANNOUNCEMENT"] > div {
+  display: flex !important; width: 100% !important; padding: 0 !important;
+  background: transparent !important; border: 0 !important; box-shadow: none !important; backdrop-filter: none !important;
+}
+html[data-nasapunk-theme] [data-nasapunk-notice] :is(.markdown, .markdown-body) {
+  background: transparent !important; color: var(--nasapunk-ink) !important;
+  border: 0 !important; box-shadow: none !important; margin: 0 !important; padding: 0 !important;
+}
+html[data-nasapunk-theme] [data-nasapunk-notice] :is(.hope-notification__title, .hope-notification__description) { color: var(--nasapunk-ink) !important; }
+html[data-nasapunk-theme] [data-nasapunk-notice] .hope-close-button {
+  position: absolute !important; top: 9px !important; right: 8px !important;
+  color: var(--nasapunk-muted) !important; background: transparent !important; z-index: 2;
+}
+html[data-nasapunk-theme] [data-nasapunk-notice] .hope-close-button:hover { background: #e2dece !important; color: #2b302e !important; }
+@media (max-width: 600px) {
+  html[data-nasapunk-theme] .hope-notification__list { right: 14px !important; width: calc(100vw - 28px) !important; gap: 42px !important; }
+  /* 窄屏通知会覆盖导航标题；用小块底色保持浮动标题清晰。 */
+  html[data-nasapunk-theme] [data-nasapunk-notice]::before { background: var(--nasapunk-panel); padding: 0 4px; margin-left: -4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-nasapunk-theme] [data-nasapunk-notice], html[data-nasapunk-theme] [data-nasapunk-notice]::before { transition-duration: 1ms !important; }
+}
+
+/* Solid Context Menu 独立于 Hope UI，配色统一读取主题变量。 */
+html[data-nasapunk-theme] .solid-contextmenu {
+  --nasapunk-font-active: var(--nasapunk-font-popup);
+  background: var(--nasapunk-panel) !important; color: var(--nasapunk-ink) !important;
+  border: 1px solid var(--nasapunk-edge) !important; border-radius: var(--nasapunk-radius) !important;
+  box-shadow: var(--nasapunk-shadow) !important;
+}
+html[data-nasapunk-theme] .solid-contextmenu :is(.solid-contextmenu__item, .solid-contextmenu__item__content) {
+  color: var(--nasapunk-ink) !important; background: transparent;
+}
+html[data-nasapunk-theme] .solid-contextmenu .solid-contextmenu__item:not([disabled]):hover > .solid-contextmenu__item__content {
+  background: var(--nasapunk-hover) !important; color: var(--nasapunk-ink) !important;
+}
+html[data-nasapunk-theme] .solid-contextmenu :is(svg, .solid-contextmenu__item__content *) { color: inherit; }
+html[data-nasapunk-theme] .solid-contextmenu .solid-contextmenu__separator { background: var(--nasapunk-line) !important; }
+html[data-nasapunk-theme] .markdown-body [data-nasapunk-md-title] { letter-spacing: 0; font-synthesis: none; text-shadow: none; }
+html[data-nasapunk-theme] .nasapunk-md-title-text { text-shadow: none; }
+
+.nasapunk-footer-symbol[hidden] { display: none !important; }
