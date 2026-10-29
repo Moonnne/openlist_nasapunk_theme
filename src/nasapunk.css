@@ -902,4 +902,10 @@ html[data-nasapunk-theme] .nasapunk-md-title-text { text-shadow: none; }
 
 /* 背景地形不参与布局或指针交互。 */
 html[data-nasapunk-terrain] body { isolation: isolate; }
-#nasapunk-terrain { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+#nasapunk-terrain {
+  position: fixed; inset: -24px; width: calc(100% + 48px); height: calc(100% + 48px);
+  max-width: none; object-fit: cover; z-index: -1; pointer-events: none; opacity: .55;
+  transition: transform 180ms ease-out; will-change: transform;
+}
+html[data-nasapunk-mode="dark"] #nasapunk-terrain { opacity: .6; }
+@media (prefers-reduced-motion: reduce) { #nasapunk-terrain { transition: none; will-change: auto; } }

@@ -22,11 +22,10 @@
     clearTimeout(entry.enterTimer); clearTimeout(entry.closeTimer);
   }
   function position() {
-    const nav = document.querySelector(".hope-breadcrumb");
     const header = document.querySelector(".header");
     const headerBottom = header?.getBoundingClientRect().bottom || 72;
-    const top = Math.max(48, headerBottom + 30, nav?.getBoundingClientRect().top || 0);
-    const value = Math.round(Math.min(top, innerHeight * .35)) + "px";
+    const gap = parseFloat(getComputedStyle(html).getPropertyValue("--nasapunk-notice-header-gap")) || 48;
+    const value = Math.round(Math.max(0, headerBottom) + gap) + "px";
     if (html.style.getPropertyValue("--nasapunk-notice-top") !== value) html.style.setProperty("--nasapunk-notice-top", value);
   }
   function refresh() {

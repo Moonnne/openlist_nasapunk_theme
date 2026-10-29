@@ -11,7 +11,7 @@ window.NASAPUNK_CONFIG = {
   assetBase: "https://cdn.jsdelivr.net/gh/Moonnne/openlist_nasapunk_theme@main/src", // 默认使用本仓库 CDN；Fork 后改成自己的仓库地址（末尾 / 可省略）
   logoUrl: "", // 默认沿用 OpenList；可填写相对 assetBase 的路径或完整 URL
   footerLogoUrl: "nasapunk-icon.svg", // 页脚右侧图形，留空隐藏
-  terrainBackground: true, // 纯色主页面的等高线背景
+  terrainBackground: true, // 纯色主页面的静态 SVG 等高线；false 不加载资源
   loading: { enabled: true, minimumMs: 1800, stableMs: 180, completeHoldMs: 180, stalledMs: 40000 },
   pageTransitions: true, // 页面切换动画
   themeTransitions: true, // 全屏日月主题切换动画
@@ -74,6 +74,7 @@ window.NASAPUNK_CONFIG = {
   --nasapunk-reading-size: 16px;
   --nasapunk-selection-thickness: 3.2px; /* 选区下划线使用固定厚度，不随选中文字的字号变化。 */
   --nasapunk-reading-leading: 1.8;
+  --nasapunk-notice-header-gap: 48px; /* 通知框与顶栏底部的间距 */
 }
 
 /* 暗色：石墨设备面板，保留与浅色相同的三色标记。 */
