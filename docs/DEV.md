@@ -9,7 +9,7 @@
 | `src/nasapunk.css` | 固定布局、外观和动画 |
 | `src/nasapunk-head.js` | 公告与提示适配 |
 | `src/nasapunk-main.js` | DOM、主题、账户、Markdown、底栏和色带适配 |
-| `src/nasapunk-icon.svg` | 默认图形 Logo 与 favicon |
+| `src/nasapunk-icon.svg` | 默认页脚图形 Logo |
 
 无需打包。首屏必需样式与控制器直接内联在 HTML head 中，在任何 CDN 请求完成前挂载遮罩。外部 CSS、通知脚本、页面脚本加载成功且页面资源就绪后才揭幕。body 入口等待 `window.__nasapunkAssetsReady` 后加载 main，成功时通知首屏控制器；资源错误或超时会解除遮罩。首屏开关关闭时仍暂时隐藏未就绪的正文，避免无样式内容闪现。文件统一使用 UTF-8、CRLF。
 
@@ -20,7 +20,9 @@
 | 参数 | 初始值 | 说明 |
 | --- | --- | --- |
 | `assetBase` | 本仓库 main 的 src CDN URL | 不含文件名，末尾斜杠可省略；留空跳过加载 |
-| `logoUrl` | `nasapunk-icon.svg` | 相对 assetBase 或完整 HTTP(S) URL；留空沿用原生 Logo/favicon 并隐藏主题页脚图形 |
+| `logoUrl` | 空字符串 | 留空沿用 OpenList 顶栏、登录页 Logo 与 favicon；也可填写相对 assetBase 的路径或完整 HTTP(S) URL |
+| `footerLogoUrl` | `nasapunk-icon.svg` | 独立页脚图形；相对 assetBase 或完整 HTTP(S) URL；留空隐藏 |
+| `terrainBackground` | `true` | 纯色主页面的动态等高线背景；false 关闭 |
 | `pageTransitions` | `true` | 页面切换过渡 |
 | `themeTransitions` | `true` | 明暗主题切换过渡 |
 | `pageRibbon` | `true` | 导航三色带贯穿内容区并连接底栏 |
@@ -59,7 +61,9 @@
 ```js
 window.NASAPUNK_CONFIG = {
   assetBase: "https://cdn.jsdelivr.net/gh/your-name/your-theme@main/src",
-  logoUrl: "nasapunk-icon.svg",
+  logoUrl: "",
+  footerLogoUrl: "nasapunk-icon.svg",
+  terrainBackground: true,
   loading: {
     enabled: true,
     minimumMs: 1200,
@@ -229,20 +233,39 @@ v1.0.0 仅为示例，并非已创建版本；Fork 用户应同时替换用户�
 
 ## 品牌资源
 
-默认图形为 `src/nasapunk-icon.svg`，顶栏、登录页、页脚和 favicon 共用 head 的 `logoUrl`；字标仍是独立的内联 SVG。默认地址由 `assetBase` 拼接，因此 Fork 或更新版本只需同步修改基址。站点名称与登录页标题仍由 OpenList 设置管理。退出主题适配器或进入管理后台时还原原生图标属性。
+顶栏、登录页 Logo 和 favicon 默认沿用 OpenList 的配置；站点名称与登录页标题仍由 OpenList 管理。页脚右侧大 Logo 独立使用 `src/nasapunk-icon.svg`；字标是内联 SVG。相对路径会与 `assetBase` 拼接。退出主题适配器或进入管理后台时还原原生图标属性。
+
+默认配置示例：
 
 ```js
-// 使用仓库 src 目录内的默认文件
-logoUrl: "nasapunk-icon.svg"
-
-// 换用自己 CDN 上的图标（Logo 与 favicon 同步）
-logoUrl: "https://cdn.example.com/brand/logo.svg"
-
-// 沿用 OpenList 自身 Logo/favicon，并隐藏主题页脚图形
-logoUrl: ""
+logoUrl: "",
+footerLogoUrl: "nasapunk-icon.svg",
 ```
 
-以上是三种互斥写法，只选择一项放入配置对象。自定义路径应返回图像文件，不是 GitHub 的文件预览页面。SVG 按 `image/svg+xml` 提供。发布时同时上传该 SVG；相同 URL 替换图标可能受浏览器和 CDN 缓存影响，建议使用新提交 SHA 或标签。图形设计提示词见 [LOGO_PROMPT.md](LOGO_PROMPT.md)。
+自定义示例（替换对应配置项）：
+
+```js
+logoUrl: "https://cdn.example.com/brand/logo.svg", // 顶栏、登录页与 favicon
+footerLogoUrl: "https://cdn.example.com/brand/footer.svg", // 独立页脚图形
+```
+
+仅隐藏页脚图形时填写 `footerLogoUrl: ""`。路径应返回图像文件，不是 GitHub 预览页面；SVG 按 `image/svg+xml` 提供。同一 URL 替换图标会受缓存影响，建议使用新提交 SHA 或标签。
+
+## 等高线背景
+
+`terrainBackground: true` 在纯色主页面启用，`terrainBackground: false` 关闭。配置 `backgrounds.main.url` 后自动隐藏；登录页和管理页不显示。示例：
+
+```js
+terrainBackground: true,
+backgrounds: {
+  main: { url: "", color: "", size: "cover", position: "center" },
+  footer: { url: "", color: "", size: "cover", position: "center" }
+},
+```
+
+Canvas 绘制连续多山脊、峡谷和盆地的等高线，使用深度遮挡隐藏后方线段。它位于内容与色带下方，不占布局空间，不接受指针事件。首屏加载完成后由低到高逐层显示；空闲时每隔 8–14 秒扫描部分高度层。鼠标只改变整个地形的位移，最大水平 7px、垂直 5px，不改变局部形状。
+
+系统开启减少动态效果时只显示静态地形；触屏不启用指针视差。几何路径只在视口尺寸变化时重建，画布像素倍率最高 1.5；空闲时不持续绘制，页面隐藏时暂停。适配器销毁时清理画布、定时器与事件监听。
 
 ## 视觉兼容
 

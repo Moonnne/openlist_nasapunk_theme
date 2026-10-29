@@ -13,6 +13,7 @@
 
 - **统一的视觉语言**：粗体斜体区域标题、文件夹页签、硬边面板、三色标记贯穿导航、文件区和页脚。
 - **明暗主题**：首次跟随系统，支持手动切换与会话记忆；日间、夜间的菜单和控件配色保持一致。
+- **等高线背景**：纯色主页面可显示立体地形、逐层扫描和整体轻微视差，支持关闭并适配减少动态效果设置。
 - **动态反馈**：首屏加载进度、日月主题切换动画，以及悬停边角逐渐闭合、显示 READY 的按钮反馈。
 - **Markdown 阅读区**：文件夹外壳包围飞行膝板式内容面板，首个 H1 标题配有响应式三色带，普通首段保留原样。
 - **完整的页面细节**：账户入口、统一样式的通知与倒计时、独立页脚背景，以及站点运行时间。
@@ -20,13 +21,19 @@
 
 ## 效果预览
 
-| 登录页 | 加载页 |
-| :----: | :----: |
-|        |        |
+|              登录页               |                加载页                 |
+| :-------------------------------: | :-----------------------------------: |
+| ![login](./docs/images/login.png) | ![loading](./docs/images/loading.png) |
 
-| 日间主题 | 夜间主题 |
-| :------: | :------: |
-|          |          |
+|                    日间主题                     |                      夜间主题                       |
+| :---------------------------------------------: | :-------------------------------------------------: |
+| ![homepage_day](./docs/images/homepage_day.png) | ![homepage_night](./docs/images/homepage_night.png) |
+
+|              Markdown样式               |
+| :-------------------------------------: |
+| ![markdown](./docs/images/markdown.png) |
+
+
 
 ## 快速使用
 
@@ -42,7 +49,7 @@
 https://cdn.jsdelivr.net/gh/Moonnne/openlist_nasapunk_theme@main/src
 ```
 
-默认使用 NASAPUNK 字标与纯色背景，运行时间默认隐藏。需要设置自己的品牌、背景和站点信息时，请按下面的 Fork 流程操作。图形 Logo 与 favicon 默认使用仓库内的 `src/nasapunk-icon.svg`，随 CDN 基址自动加载。
+默认使用 NASAPUNK 字标与纯色背景，运行时间默认隐藏。需要设置自己的品牌、背景和站点信息时，请按下面的 Fork 流程操作。顶栏、登录页 Logo 和 favicon 默认沿用 OpenList 配置；页脚右侧大 Logo 独立使用仓库内的 `src/nasapunk-icon.svg`，随 CDN 基址自动加载。
 
 ## 可选参数
 
@@ -50,7 +57,9 @@ https://cdn.jsdelivr.net/gh/Moonnne/openlist_nasapunk_theme@main/src
 
 | 参数 | 用途 |
 | --- | --- |
-| `logoUrl` | 统一的图形 Logo 与 favicon，默认 `nasapunk-icon.svg` |
+| `logoUrl` | 顶栏、登录页 Logo 与 favicon；默认留空，沿用 OpenList |
+| `footerLogoUrl` | 页脚右侧大 Logo，默认 `nasapunk-icon.svg` |
+| `terrainBackground` | 纯色主页面等高线背景，默认开启 |
 | `pageTransitions` / `themeTransitions` | 页面／明暗切换动画 |
 | `pageRibbon` | 向下贯穿内容区的三色带 |
 | `selectionUnderline` | 文字选区下划线效果 |
@@ -64,7 +73,9 @@ https://cdn.jsdelivr.net/gh/Moonnne/openlist_nasapunk_theme@main/src
 填写示例（修改 head 中对应项目）：
 
 ```js
-logoUrl: "nasapunk-icon.svg", // 使用仓库默认图标
+logoUrl: "",                // 沿用 OpenList 图标
+footerLogoUrl: "nasapunk-icon.svg", // 页脚使用主题图形
+terrainBackground: false,   // 关闭等高线背景
 themeTransitions: false,     // 关闭明暗切换动画
 pageRibbon: false,           // 关闭贯穿色带
 startedAt: "2026-01-01T00:00:00+08:00", // 从示例日期计算运行时间
@@ -89,6 +100,6 @@ startedAt: "2026-01-01T00:00:00+08:00", // 从示例日期计算运行时间
 
 希望固定版本时，可把 URL 中的 `main` 替换为自己仓库已有的版本标签或提交 SHA。jsDelivr 存在缓存，正式更新推荐使用新版本地址；仅替换入口内容不会自动刷新同地址的 CDN 缓存。
 
-顶栏、登录页、页脚图形及 favicon 默认使用主题 Logo；将 `logoUrl` 留空可沿用 OpenList 的 Logo/favicon。文章三色带使用 Markdown 首个非空 H1（`# 标题`）；没有 H1 时不生成文章标题带。
+顶栏、登录页和 favicon 由 `logoUrl` 控制；页脚大 Logo 由 `footerLogoUrl` 独立控制。文章三色带使用 Markdown 首个非空 H1（`# 标题`）；没有 H1 时不生成文章标题带。
 
 资源结构、字体接入、参数详情和开发验证流程见 **[DEV.md](docs/DEV.md)**。

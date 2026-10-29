@@ -232,7 +232,7 @@
 
   /* 图形 Logo 与 favicon；清理时还原宿主属性。 */
   const brandingNodes = new Map();
-  let themeFavicon = null;
+  let themeFavicon = null, brandingKey = null;
   function brandingAttribute(node, name, value) {
     let original = brandingNodes.get(node);
     if (!original) { original = new Map(); brandingNodes.set(node, original); }
@@ -244,35 +244,44 @@
     for (const [node, attrs] of brandingNodes) for (const [name, value] of attrs) {
       if (value === null) node.removeAttribute(name); else node.setAttribute(name, value);
     }
-    brandingNodes.clear(); themeFavicon?.remove(); themeFavicon = null;
+    brandingNodes.clear(); themeFavicon?.remove(); themeFavicon = null; brandingKey = null;
   }
   function syncBranding(root, login) {
-    const value = config.logoUrl === undefined ? "nasapunk-icon.svg" : config.logoUrl;
-    if (!value) { if (brandingNodes.size) restoreBranding(); return; }
-    let url;
-    try {
-      const base = new URL((config.assetBase || "").replace(/\/$/, "") + "/", document.baseURI);
-      url = new URL(value, base);
-      if (!/^https?:$/.test(url.protocol)) return;
-    } catch { return; }
-    const images = new Set(root.querySelectorAll(".header .header-left img"));
-    if (login) root.querySelectorAll(".hope-heading img").forEach(image => images.add(image));
+    const resolve = value => {
+      if (!value) return null;
+      try {
+        const base = new URL((config.assetBase || "").replace(/\/$/, "") + "/", document.baseURI);
+        const url = new URL(value, base);
+        return /^https?:$/.test(url.protocol) ? url : null;
+      } catch { return null; }
+    };
+    const site = resolve(config.logoUrl);
+    const footerURL = resolve(config.footerLogoUrl === undefined ? "nasapunk-icon.svg" : config.footerLogoUrl);
+    const key = (site?.href || "") + "|" + (footerURL?.href || "");
+    if (key !== brandingKey) { restoreBranding(); brandingKey = key; }
+    const images = new Set();
+    if (site) {
+      root.querySelectorAll(".header .header-left img").forEach(image => images.add(image));
+      if (login) root.querySelectorAll(".hope-heading img").forEach(image => images.add(image));
+    }
     const footer = document.querySelector(".nasapunk-footer-symbol");
-    if (footer) images.add(footer);
+    if (footer && footerURL) images.add(footer);
     for (const image of images) {
-      brandingAttribute(image, "src", url.href);
+      brandingAttribute(image, "src", (image === footer ? footerURL : site).href);
       brandingAttribute(image, "srcset", null);
       if (image === footer) brandingAttribute(image, "hidden", null);
     }
-    let icons = Array.from(document.head.querySelectorAll('link[rel~="icon"]'));
-    if (!icons.length) {
-      themeFavicon = document.createElement("link"); themeFavicon.rel = "icon";
-      document.head.append(themeFavicon); icons = [themeFavicon];
-    }
-    for (const icon of icons) {
-      brandingAttribute(icon, "href", url.href);
-      brandingAttribute(icon, "type", url.pathname.endsWith(".svg") ? "image/svg+xml" : null);
-      brandingAttribute(icon, "sizes", url.pathname.endsWith(".svg") ? "any" : null);
+    if (site) {
+      let icons = Array.from(document.head.querySelectorAll('link[rel~="icon"]'));
+      if (!icons.length) {
+        themeFavicon = document.createElement("link"); themeFavicon.rel = "icon";
+        document.head.append(themeFavicon); icons = [themeFavicon];
+      }
+      for (const icon of icons) {
+        brandingAttribute(icon, "href", site.href);
+        brandingAttribute(icon, "type", site.pathname.endsWith(".svg") ? "image/svg+xml" : null);
+        brandingAttribute(icon, "sizes", site.pathname.endsWith(".svg") ? "any" : null);
+      }
     }
     for (const node of brandingNodes.keys()) if (!node.isConnected) brandingNodes.delete(node);
   }
@@ -828,6 +837,184 @@
       probe.src = url;
     }
   }
+  /* 等高线背景：固定几何、整体视差和分层扫描。 */
+  let terrain = null;
+  function removeTerrain() {
+    if (!terrain) return;
+    cancelAnimationFrame(terrain.frame); clearTimeout(terrain.timer);
+    terrain.canvas.remove(); terrain = null;
+    html.removeAttribute("data-nasapunk-terrain");
+  }
+  function buildTerrain(state) {
+    const w = innerWidth, h = innerHeight, dpr = Math.min(devicePixelRatio || 1, 1.5);
+    state.width = w; state.height = h; state.dpr = dpr;
+    state.canvas.width = Math.round(w * dpr); state.canvas.height = Math.round(h * dpr);
+    const nx = 176, ny = 128, points = [];
+    const hash = (x, y) => {
+      const n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
+      return n - Math.floor(n);
+    };
+    const noise = (x, y) => {
+      const ix = Math.floor(x), iy = Math.floor(y), fx = x - ix, fy = y - iy;
+      const sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+      const a = hash(ix, iy), b = hash(ix + 1, iy), c = hash(ix, iy + 1), d = hash(ix + 1, iy + 1);
+      return a + (b - a) * sx + (c - a) * sy + (a - b - c + d) * sx * sy;
+    };
+    const fractal = (x, y) => .57 * noise(x, y) + .28 * noise(x * 2.03 + 8, y * 2.03 - 5) + .15 * noise(x * 4.09 - 3, y * 4.09 + 11);
+    const elevation = (x, y) => {
+      const u = x + .65 * (fractal(x * .75 + 3, y * .75) - .5);
+      const v = y + .65 * (fractal(x * .75, y * .75 + 7) - .5);
+      const ridge = Math.exp(-Math.pow((v - .48 * Math.sin(u * 1.65) + .24 * Math.cos(u * 3.1)) / .36, 2));
+      const canyon = Math.exp(-Math.pow((u + .5 * Math.sin(v * 1.8) - .8) / .2, 2));
+      const basin = Math.exp(-((u + 1.35) ** 2 / .36 + (v - .8) ** 2 / .48));
+      const rim = Math.exp(-Math.pow((Math.hypot((u + 1.35) * 1.05, v - .8) - .82) / .2, 2));
+      return Math.max(.04, .14 + 1.16 * fractal(u * 1.3 + 12, v * 1.3 + 8) + .38 * ridge - .28 * canyon - .3 * basin + .22 * rim);
+    };
+    for (let y = 0; y <= ny; y++) for (let x = 0; x <= nx; x++) {
+      const u = x / nx * 7.4 - 3.7, v = y / ny * 6 - 3;
+      points.push({ u, v, z: elevation(u, v) });
+    }
+    const project = (u, v, z) => [w * (.5 + .2 * (.93 * u + .5 * v)), h * (.56 + .17 * (.85 * v - .32 * u) - .25 * (z - .65)), .85 * v - .32 * u + .7 * z];
+    // 深度缓冲先记录完整表面，再裁掉被前景遮挡的线段。
+    const resolution = Math.min(1, 1600 / w), dw = Math.ceil(w * resolution), dh = Math.ceil(h * resolution);
+    const depth = new Float32Array(dw * dh); depth.fill(-Infinity);
+    const owners = new Int32Array(dw * dh); owners.fill(-1);
+    const planes = [];
+    const projected = points.map(p => project(p.u, p.v, p.z));
+    const triangles = [];
+    for (let y = 0; y < ny; y++) for (let x = 0; x < nx; x++) {
+      const i = y * (nx + 1) + x;
+      triangles.push([i, i + 1, i + nx + 2], [i, i + nx + 2, i + nx + 1]);
+    }
+    for (let triangle = 0; triangle < triangles.length; triangle++) {
+      const [a, b, c] = triangles[triangle].map(i => projected[i]);
+      const ax = a[0] * resolution, ay = a[1] * resolution, bx = b[0] * resolution, by = b[1] * resolution, cx = c[0] * resolution, cy = c[1] * resolution;
+      const det = (by - cy) * (ax - cx) + (cx - bx) * (ay - cy);
+      if (Math.abs(det) < .00001) continue;
+      const slopeX = ((by - cy) * (a[2] - c[2]) + (cy - ay) * (b[2] - c[2])) / det;
+      const slopeY = ((cx - bx) * (a[2] - c[2]) + (ax - cx) * (b[2] - c[2])) / det;
+      planes[triangle] = [slopeX, slopeY, c[2] - slopeX * cx - slopeY * cy];
+      const left = Math.max(0, Math.floor(Math.min(ax, bx, cx))), right = Math.min(dw - 1, Math.ceil(Math.max(ax, bx, cx)));
+      const top = Math.max(0, Math.floor(Math.min(ay, by, cy))), bottom = Math.min(dh - 1, Math.ceil(Math.max(ay, by, cy)));
+      for (let y = top; y <= bottom; y++) for (let x = left; x <= right; x++) {
+        const p = ((by - cy) * (x + .5 - cx) + (cx - bx) * (y + .5 - cy)) / det;
+        const q = ((cy - ay) * (x + .5 - cx) + (ax - cx) * (y + .5 - cy)) / det;
+        if (p < 0 || q < 0 || p + q > 1) continue;
+        const z = p * a[2] + q * b[2] + (1 - p - q) * c[2], index = y * dw + x;
+        if (z > depth[index]) { depth[index] = z; owners[index] = triangle; }
+      }
+    }
+    state.layers = [];
+    for (let layer = 0; layer < 24; layer++) {
+      const level = .04 + layer * .059, outline = new Path2D(), markers = [];
+      for (let index = 0; index < triangles.length; index++) {
+        const cell = triangles[index].map(i => points[i]), cuts = [];
+        for (let edge = 0; edge < 3; edge++) {
+          const a = cell[edge], b = cell[(edge + 1) % 3];
+          if ((a.z >= level) === (b.z >= level)) continue;
+          const t = (level - a.z) / (b.z - a.z);
+          cuts.push(project(a.u + (b.u - a.u) * t, a.v + (b.v - a.v) * t, level));
+        }
+        if (cuts.length !== 2) continue;
+        const [a, b] = cuts, steps = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1])));
+        let drawing = false;
+        for (let step = 0; step <= steps; step++) {
+          const t = step / steps, x = a[0] + (b[0] - a[0]) * t, y = a[1] + (b[1] - a[1]) * t, z = a[2] + (b[2] - a[2]) * t;
+          const px = Math.floor(x * resolution), py = Math.floor(y * resolution);
+          const inside = px >= 0 && px < dw && py >= 0 && py < dh;
+          const plane = inside ? planes[owners[py * dw + px]] : null;
+          const visible = inside && (!plane || z >= plane[0] * x * resolution + plane[1] * y * resolution + plane[2] - .002);
+          if (!visible) { drawing = false; continue; }
+          if (drawing) outline.lineTo(x, y); else outline.moveTo(x, y);
+          drawing = true;
+          if (step === 0 && index % 191 === 0) markers.push([x, y]);
+        }
+      }
+      state.layers.push({ outline, markers });
+    }
+  }
+  function queueTerrain() {
+    if (terrain && !terrain.frame && !document.hidden) terrain.frame = requestAnimationFrame(drawTerrain);
+  }
+  function drawTerrain(now) {
+    const state = terrain;
+    if (!state) return;
+    state.frame = 0;
+    if (document.hidden) return;
+    const still = reducedMotion.matches;
+    const started = state.started !== null;
+    const progress = still ? 1 : started ? Math.min(1, (now - state.started) / 2800) : 0;
+    state.x += ((still ? 0 : state.targetX) - state.x) * .09;
+    state.y += ((still ? 0 : state.targetY) - state.y) * .09;
+    const ctx = state.context;
+    ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+    ctx.clearRect(0, 0, state.width, state.height);
+    ctx.translate(state.x, state.y);
+    ctx.strokeStyle = state.color; ctx.fillStyle = state.color; ctx.lineWidth = 1.25;
+    const sweep = state.scan === null ? -1 : (now - state.scan) / 1500;
+    for (let i = 0; i < state.layers.length; i++) {
+      const layer = state.layers[i], alpha = Math.max(0, Math.min(1, progress * (state.layers.length + 1) - i));
+      if (!alpha) continue;
+      ctx.globalAlpha = alpha * (i % 4 === 0 ? .46 : .32);
+      ctx.stroke(layer.outline);
+      const entry = progress < 1 && alpha < 1;
+      const refresh = !still && sweep >= 0 && sweep < 1 && i >= state.band && i < state.band + 4;
+      if (!entry && !refresh) continue;
+      const phase = entry ? alpha : sweep;
+      ctx.save(); ctx.beginPath();
+      ctx.rect(phase * (state.width + 160) - 160, -20, 160, state.height + 40); ctx.clip();
+      ctx.globalAlpha = .5 * Math.sin(phase * Math.PI); ctx.stroke(layer.outline);
+      for (const [x, y] of layer.markers) ctx.fillRect(x - 2, y - 2, 4, 4);
+      ctx.restore();
+    }
+    if (sweep >= 1) state.scan = null;
+    const moving = Math.abs(state.x - (still ? 0 : state.targetX)) + Math.abs(state.y - (still ? 0 : state.targetY)) > .03;
+    if (!still && ((started && progress < 1) || state.scan !== null || moving)) queueTerrain();
+    if (!still && started && progress >= 1 && state.scan === null && !state.timer) {
+      state.timer = setTimeout(() => {
+        state.timer = 0;
+        if (terrain !== state || document.hidden) return;
+        state.band = Math.floor(Math.random() * (state.layers.length - 4)); state.scan = performance.now(); queueTerrain();
+      }, 8000 + Math.random() * 6000);
+    }
+  }
+  function syncTerrain() {
+    const enabled = config.terrainBackground !== false && html.dataset.nasapunkPage === "home" && !config.backgrounds?.main?.url?.trim();
+    if (!enabled) { removeTerrain(); return; }
+    if (!terrain) {
+      const canvas = document.createElement("canvas"); canvas.id = "nasapunk-terrain";
+      canvas.setAttribute("aria-hidden", "true");
+      const context = canvas.getContext("2d");
+      if (!context) return;
+      terrain = { canvas, context, frame: 0, timer: 0, started: null, scan: null, band: 0, x: 0, y: 0, targetX: 0, targetY: 0 };
+      document.body.prepend(canvas); html.setAttribute("data-nasapunk-terrain", "");
+    }
+    if (terrain.width !== innerWidth || terrain.height !== innerHeight || terrain.dpr !== Math.min(devicePixelRatio || 1, 1.5)) buildTerrain(terrain);
+    terrain.color = html.dataset.nasapunkMode === "dark" ? "#a1a5a2" : "#686f6a";
+    if (terrain.started === null && window.__nasapunkBoot?.done !== false) terrain.started = performance.now();
+    if (reducedMotion.matches) { clearTimeout(terrain.timer); terrain.timer = 0; terrain.scan = null; }
+    queueTerrain();
+  }
+  function terrainPointer(event) {
+    if (!terrain || reducedMotion.matches || event.pointerType === "touch") return;
+    terrain.targetX = (event.clientX / innerWidth - .5) * 14;
+    terrain.targetY = (event.clientY / innerHeight - .5) * 10;
+    queueTerrain();
+  }
+  function resetTerrainPointer() {
+    if (terrain) { terrain.targetX = 0; terrain.targetY = 0; queueTerrain(); }
+  }
+  function terrainVisibility() {
+    if (!terrain) return;
+    cancelAnimationFrame(terrain.frame); terrain.frame = 0; clearTimeout(terrain.timer); terrain.timer = 0;
+    if (!document.hidden) syncTerrain();
+  }
+  window.addEventListener("pointermove", terrainPointer, { passive: true });
+  document.addEventListener("pointerleave", resetTerrainPointer);
+  document.addEventListener("visibilitychange", terrainVisibility);
+  window.addEventListener("nasapunk:boot-complete", syncTerrain);
+  reducedMotion.addEventListener("change", syncTerrain);
+
   function textValue(node, text) {
     if (!node || node.textContent === text) return;
     if (node.firstChild?.nodeType === Node.TEXT_NODE && node.childNodes.length === 1) node.firstChild.nodeValue = text;
@@ -903,6 +1090,7 @@
     const login = /\/@login(?:\/|$)/.test(location.pathname);
     html.dataset.nasapunkPage = manage ? "manage" : login ? "login" : "home";
     if (manage) {
+      removeTerrain();
       restoreBranding();
       clearSectionHeadings();
       removePageRibbon();
@@ -924,6 +1112,7 @@
     syncSiteAccent();
     html.dataset.nasapunkSelection = config.selectionUnderline === false ? "native" : "underline";
     syncBackgrounds();
+    syncTerrain();
     syncHeader(root);
     syncToolbars();
     syncMarkdown(root);
@@ -993,6 +1182,12 @@
   window.__nasapunkSkin = {
     refresh: schedule,
     destroy() {
+      removeTerrain();
+      window.removeEventListener("pointermove", terrainPointer);
+      document.removeEventListener("pointerleave", resetTerrainPointer);
+      document.removeEventListener("visibilitychange", terrainVisibility);
+      window.removeEventListener("nasapunk:boot-complete", syncTerrain);
+      reducedMotion.removeEventListener("change", syncTerrain);
       disposed = true;
       clearSectionHeadings();
       removePageRibbon();

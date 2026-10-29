@@ -4,12 +4,14 @@
    背景图片：填写你自己的图片 URL；留空或加载失败时将回退到默认纯色主题。
    main 和 footer 完全独立；color 留空跟随明暗主题，也可填写 CSS 颜色。
    size 可填 cover / contain，position 可填 center / center top。
-   logoUrl 默认相对 assetBase 解析；留空沿用 OpenList 的 Logo 与 favicon。
+   logoUrl 留空沿用 OpenList 的 Logo 与 favicon；footerLogoUrl 独立设置页脚图形。
    startedAt 留空隐藏运行时间；填写时使用包含时区的 ISO 日期。
 */
 window.NASAPUNK_CONFIG = {
   assetBase: "https://cdn.jsdelivr.net/gh/Moonnne/openlist_nasapunk_theme@main/src", // 默认使用本仓库 CDN；Fork 后改成自己的仓库地址（末尾 / 可省略）
-  logoUrl: "nasapunk-icon.svg", // 顶栏、登录页、页脚和 favicon；也可填写完整 URL
+  logoUrl: "", // 默认沿用 OpenList；可填写相对 assetBase 的路径或完整 URL
+  footerLogoUrl: "nasapunk-icon.svg", // 页脚右侧图形，留空隐藏
+  terrainBackground: true, // 纯色主页面的等高线背景
   loading: { enabled: true, minimumMs: 1800, stableMs: 180, completeHoldMs: 180, stalledMs: 40000 },
   pageTransitions: true, // 页面切换动画
   themeTransitions: true, // 全屏日月主题切换动画
